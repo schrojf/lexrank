@@ -21,7 +21,7 @@ uv run lexrank demo -l en
 
 - [How it works](#how-it-works) · [What is implemented](#what-is-implemented)
 - [What it's for](#what-its-for) · [Strengths and weaknesses](#strengths-and-weaknesses)
-- [Usage](#usage) · [Worked examples](#worked-examples)
+- [Usage](#usage) · [Command line](#command-line) · [Worked examples](#worked-examples)
 - [Understanding the ROUGE scores](#understanding-the-rouge-scores)
 - [LexRank and LLMs](#lexrank-and-llms) — replace, or combine
 - [Reproducing the paper](#reproducing-the-paper) · [Demo datasets](#demo-datasets)
@@ -276,17 +276,202 @@ degree_centrality(similarity, 0.1)
 | `reranker_threshold` | `0.5` | Redundancy filter. Lower removes more near-duplicates |
 | `idf` | derived | Pass a background corpus model for better term weighting |
 
-### Command line
+---
 
-```bash
-lexrank summarize -d harbour-storm -n 3        # a bundled cluster
-lexrank summarize doc1.txt doc2.txt -b 665     # your own files, DUC byte budget
-cat article.txt | lexrank summarize -l sk -n 5 # stdin
-lexrank datasets                               # list bundled corpora
-lexrank demo -l sk                             # summarize + score every cluster
-lexrank evaluate                               # compare methods by ROUGE-1
-lexrank paper                                  # recompute the paper's Tables 1 and 2
+## Command line
+
+Inside a clone, prefix everything with `uv run`. Installing the package
+(`uv tool install .`) puts `lexrank` on your PATH and the prefix drops.
+
+```console
+$ uv run lexrank --help
+usage: lexrank [-h] {summarize,datasets,demo,evaluate,paper} ...
+
+LexRank extractive summarization (Erkan & Radev, 2004).
+
+positional arguments:
+  {summarize,datasets,demo,evaluate,paper}
+    summarize           summarize files, stdin or a bundled cluster
+    datasets            list the bundled demo clusters
+    demo                summarize every bundled cluster and score it
+    evaluate            compare centrality methods by ROUGE-1
+    paper               reproduce Table 1 and Table 2 from the paper's Figure 1
 ```
+
+### `summarize` — your own files
+
+Give it one file per document. The cross-document overlap is what it ranks on,
+so two files beat one.
+
+```console
+$ cat > wire.txt <<'EOF'
+A two-metre storm surge came over the harbour wall at Aldren Bay on Tuesday morning.
+Emergency services evacuated more than four thousand residents from the lower town overnight.
+The regional council said seven people were treated for minor injuries.
+EOF
+
+$ cat > business.txt <<'EOF'
+Insurers expect claims from the Aldren Bay flooding to exceed 300 million euro.
+The two-metre surge that came over the harbour wall inundated nine hundred commercial premises.
+Shares in the port operator fell eleven percent on Tuesday afternoon.
+EOF
+
+$ uv run lexrank summarize wire.txt business.txt -n 2
+A two-metre storm surge came over the harbour wall at Aldren Bay on Tuesday morning.
+Insurers expect claims from the Aldren Bay flooding to exceed 300 million euro.
+```
+
+It picked the two sentences that share the most with the rest — the surge (stated
+in both files) and the headline financial figure — and dropped the injury count
+and the share price, which appear once each.
+
+### `summarize` — stdin
+
+```console
+$ printf 'The council approved the new flood defences on Tuesday after four years of delay.\nCampaigners said the four-year delay had left the lower town exposed to flooding.\nConstruction of the flood defences is due to begin in the autumn.\n' \
+    | uv run lexrank summarize -n 1
+The council approved the new flood defences on Tuesday after four years of delay.
+```
+
+Everything piped in is treated as a **single document**, so there is no
+cross-document signal — the Position feature does most of the work. Prefer files
+or `-d` when you have separate sources.
+
+### `summarize` — a bundled cluster
+
+```console
+$ uv run lexrank summarize -d harbour-storm -n 2
+Storm Mairead came ashore at Aldren Bay shortly before dawn on Tuesday, driving a
+two-metre surge over the harbour wall and flooding the whole of the lower town.
+More than four thousand people were evacuated from the port town of Aldren Bay
+early on Tuesday as Storm Mairead pushed a two-metre storm surge over the harbour
+wall.
+
+$ uv run lexrank summarize -l sk -d povoden-na-vrbnici -n 2
+Vyše tisícdvesto ľudí museli v utorok evakuovať z Dolných Lužian po tom, čo sa
+rieka Vrbnica vyliala z koryta.
+Na primátora Dolných Lužian Mareka Slávika rastie tlak pre nedokončenú
+protipovodňovú ochranu.
+```
+
+(Output wrapped here for the page; the tool prints one sentence per line.)
+
+### Controlling length
+
+Three mutually exclusive budgets — sentences, words, or UTF-8 bytes:
+
+```console
+$ uv run lexrank summarize -d harbour-storm -w 30      # ≤ 30 words
+$ uv run lexrank summarize -d harbour-storm -b 665     # ≤ 665 bytes, the DUC budget
+```
+
+A candidate too big for the remaining budget is **skipped, not truncated**, so a
+summary never ends mid-sentence. At `-b 300` on `harbour-storm`:
+
+| rank | score | size | outcome |
+| --- | --- | --- | --- |
+| 1 | 2.0000 | 166 B | selected — 134 B left |
+| 2 | 1.5504 | 161 B | skipped, does not fit |
+| 3 | 1.5027 | 173 B | skipped, does not fit |
+| 4 | 1.4179 | 123 B | selected — total 290 B |
+
+### Seeing why a sentence was picked
+
+```console
+$ uv run lexrank summarize -d harbour-storm -n 2 --scores
+[d1:0 score=1.5504 centrality=0.0363] Storm Mairead came ashore at Aldren Bay…
+[d2:0 score=2.0000 centrality=0.0535] More than four thousand people were evacuated…
+```
+
+`d1:0` is document `d1`, sentence 0. `centrality` is the raw LexRank score
+(sums to 1 across the cluster); `score` is the combined feature value the
+selector actually ranks on — min-max normalised centrality plus the Position
+feature, so it tops out at 2.0 with the default weights.
+
+### Choosing a method
+
+```console
+$ uv run lexrank summarize -d harbour-storm -n 2 --method degree      # cheapest
+$ uv run lexrank summarize -d harbour-storm -n 2 --method continuous  # weighted graph
+$ uv run lexrank summarize -d harbour-storm -n 2 --method lead        # baseline
+```
+
+On a small cluster these frequently agree — see the identical rows in
+`evaluate` output. Full option list: `uv run lexrank summarize --help`.
+
+### `datasets` — what's bundled
+
+```console
+$ uv run lexrank datasets -l sk
+sk  archeologicky-nalez      5 docs, 34 sentences, 2 references
+     Mohylové pohrebisko z doby bronzovej pri Vrbnických Sadoch
+sk  povoden-na-vrbnici       5 docs, 36 sentences, 2 references
+     Povodeň na rieke Vrbnica zaplavila Dolné Lužany
+sk  reforma-vysokych-skol    5 docs, 34 sentences, 2 references
+     Návrh novej metodiky financovania vysokých škôl
+sk  zeleznicny-koridor       8 docs, 196 sentences, 3 references
+     Modernizácia koridoru Brezovec – Hlohovany sa predraží na 1,42 miliardy eur
+```
+
+Drop `-l sk` for both languages.
+
+### `demo` — summarize and score every cluster
+
+```console
+$ uv run lexrank demo -l en -n 2
+==============================================================================
+en/asteroid-sample: Hesperus probe collects a sample from asteroid 4471 Odris
+5 documents, 30 sentences
+==============================================================================
+The Hesperus spacecraft completed a touch-and-go sampling manoeuvre at the…
+Images released on Tuesday from the Hesperus spacecraft show the sampling head…
+
+ROUGE-1 R=0.3931 P=0.5965 F1=0.4739
+ROUGE-2 R=0.1988 P=0.3036 F1=0.2403
+… (one block per cluster)
+```
+
+`demo` scores at whatever budget you pass, so pass `-b 665` if you want numbers
+comparable to `evaluate`. See
+[Understanding the ROUGE scores](#understanding-the-rouge-scores).
+
+### `evaluate` — compare methods
+
+Fixes the budget at 665 bytes and reports ROUGE-1 recall:
+
+```console
+$ uv run lexrank evaluate -l en
+cluster                        lexrank  continuous      degree    centroid        lead      random
+--------------------------------------------------------------------------------------------------
+en/asteroid-sample              0.5376      0.5376      0.5376      0.5780      0.4740      0.5029
+en/drought-emergency            0.3048      0.3553      0.3048      0.3553      0.3048      0.2939
+en/harbour-storm                0.5269      0.5269      0.4850      0.5269      0.5269      0.4910
+en/rate-decision                0.5260      0.6012      0.5260      0.5838      0.5202      0.5954
+--------------------------------------------------------------------------------------------------
+mean                            0.4738      0.5052      0.4634      0.5110      0.4565      0.4708
+```
+
+`random` here is a single seed (`--seed`), not the 25-seed average quoted in
+[the dataset section](#what-the-corpus-shows--and-doesnt) — which is why it
+looks stronger here than it deserves to.
+
+### `paper` — reproduce Tables 1 and 2
+
+```console
+$ uv run lexrank paper
+ID       deg 0.1   deg 0.2   deg 0.3
+d1s1          5         4         2
+d2s1          7         4         2
+d2s2          2         1         1
+…
+ID                LR 0.1            LR 0.2            LR 0.3
+d1s1     0.6005/0.6007   0.8033/0.6944   1.0000/1.0000
+…
+columns are computed/published; * marks a difference
+```
+
+Every value is recomputed from the paper's own Figure 1 matrix. See
+[Reproducing the paper](#reproducing-the-paper) for why the 0.2 column differs.
 
 ---
 
