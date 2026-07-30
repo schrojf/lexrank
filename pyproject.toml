@@ -1,7 +1,7 @@
 [project]
 name = "lexrank"
 version = "0.1.0"
-description = "Add your description here"
+description = "LexRank: graph-based lexical centrality as salience in text summarization (Erkan & Radev, 2004), with English and Slovak demo corpora"
 readme = "README.md"
 authors = [
     { name = "Viliam Schrojf", email = "viliam@schrojf.sk" }
@@ -14,6 +14,19 @@ dependencies = [
 [project.scripts]
 lexrank = "lexrank.cli:main"
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
 [build-system]
 requires = ["uv_build>=0.9.18,<0.10.0"]
 build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]
