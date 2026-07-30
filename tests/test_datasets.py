@@ -58,20 +58,28 @@ def test_synthetic_provenance_is_declared(language: str, cluster_id: str) -> Non
 def test_clusters_are_redundant_enough_for_lexrank(
     language: str, cluster_id: str
 ) -> None:
-    """The documents must actually overlap, or there is nothing to rank.
+    """The thresholded graph must actually be connected, or there is nothing
+    to rank.
 
-    Each document should share vocabulary with the rest of the cluster; a
-    cluster of unrelated texts would make every similarity near zero.
+    Deliberately not a bound on *mean* pairwise similarity: that dilutes as a
+    cluster grows, because a long article covers sub-topics that share little
+    with each other. Across the bundled clusters the mean falls from 0.069 at
+    30 sentences to 0.012 at 208 while the graph stays just as usable. What
+    LexRank actually needs is that most nodes have neighbours above the
+    threshold, which holds at every size.
     """
     cluster = load_cluster(language, cluster_id)
     ranking = LexRankSummarizer(language, idf=build_idf(language)).rank(
         cluster.documents
     )
-    off_diagonal = ranking.similarity[
-        ~np.eye(len(ranking.sentences), dtype=bool)
-    ]
-    assert off_diagonal.mean() > 0.02
-    assert off_diagonal.max() > 0.4
+    n = len(ranking.sentences)
+    off_diagonal = ranking.similarity[~np.eye(n, dtype=bool)]
+    degree = (ranking.similarity > 0.1).sum(axis=1)  # self-link included
+
+    assert off_diagonal.max() > 0.4, "no strongly similar pair anywhere"
+    # Fraction of sentences with at least one neighbour besides themselves.
+    assert (degree > 1).mean() > 0.75, "too many isolated sentences"
+    assert np.median(degree) >= 3, "graph too sparse to rank"
 
 
 @pytest.mark.parametrize("language", ["en", "sk"])
@@ -104,9 +112,15 @@ def test_every_cluster_scores_above_a_floor(language: str, cluster_id: str) -> N
     cluster ROUGE-1 is noisy enough that one lucky draw can beat LexRank. The
     paper itself medians over five random runs, and compares over 30 to 50
     clusters rather than one.
+
+    The floor is loose because ROUGE-1 recall at a *fixed* 665-byte budget
+    falls as the cluster grows: 665 bytes is roughly 100 words, which covers
+    proportionally less of the larger reference summaries that a 200-sentence
+    cluster warrants. The small clusters score 0.46-0.54 here, the large ones
+    0.30-0.32, and neither is evidence about summary quality on its own.
     """
     cluster = load_cluster(language, cluster_id)
-    assert _rouge(language, cluster, "lexrank") > 0.3
+    assert _rouge(language, cluster, "lexrank") > 0.25
 
 
 @pytest.mark.parametrize("method", ["lexrank", "continuous", "degree"])
