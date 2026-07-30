@@ -22,6 +22,7 @@ uv run lexrank demo -l en
 - [How it works](#how-it-works) · [What is implemented](#what-is-implemented)
 - [What it's for](#what-its-for) · [Strengths and weaknesses](#strengths-and-weaknesses)
 - [Usage](#usage) · [Worked examples](#worked-examples)
+- [Understanding the ROUGE scores](#understanding-the-rouge-scores)
 - [LexRank and LLMs](#lexrank-and-llms) — replace, or combine
 - [Reproducing the paper](#reproducing-the-paper) · [Demo datasets](#demo-datasets)
 - [Language support](#language-support) · [Performance](#performance)
@@ -343,6 +344,236 @@ Note the Slovak pipeline is doing real morphological work: `Lužian` / `Lužanmi
 
 ---
 
+## Understanding the ROUGE scores
+
+Every evaluation number in this README is ROUGE, so it is worth knowing exactly
+what it does and does not measure. The short version: **ROUGE counts how many
+n-grams of a human-written reference summary appear in the machine summary.**
+That is all. It is a lexical overlap statistic, not a judgement of quality.
+
+The paper uses it because DUC 2004 did (§4.1), and because unigram ROUGE was the
+variant shown to agree most closely with human judgement at the time (Lin & Hovy,
+2003).
+
+### The formula
+
+For n-gram order `n`, over a set of reference summaries:
+
+```
+                 Σ_refs  Σ_grams  Count_match(gram)
+ROUGE-N recall = ──────────────────────────────────
+                 Σ_refs  Σ_grams  Count(gram)
+```
+
+The denominator is every n-gram in every reference. The numerator counts how many
+of them the candidate also has, **clipped** by how often the candidate actually
+has them — you cannot earn credit for the word *the* five times if the reference
+only says it twice.
+
+### Worked by hand
+
+```python
+rouge_1("the river flooded the town", ["the river flooded the village"])
+# R=0.8000 P=0.8000 F1=0.8000
+```
+
+| | the | river | flooded | town | village | total |
+| --- | --- | --- | --- | --- | --- | --- |
+| candidate | 2 | 1 | 1 | 1 | 0 | **5** |
+| reference | 2 | 1 | 1 | 0 | 1 | **5** |
+| matched (clipped) | 2 | 1 | 1 | 0 | 0 | **4** |
+
+Recall is `4/5 = 0.8` — four of the reference's five unigrams were reproduced.
+Precision is `4/5 = 0.8` — four of the candidate's five unigrams were wanted. F1
+is their harmonic mean, here also 0.8.
+
+The same pair scores `0.75` under ROUGE-2, because the reference's four bigrams
+are `the river`, `river flooded`, `flooded the`, `the village`, and the candidate
+reproduces the first three.
+
+Clipping runs both ways:
+
+```python
+rouge_1("river", ["river river river"])        # R=0.3333 P=1.0000
+rouge_1("river river river", ["river"])        # R=1.0000 P=0.3333
+```
+
+### Multiple references
+
+References are **pooled**, not averaged: their n-grams all go into one
+denominator. This has a consequence that surprises people the first time:
+
+```python
+rouge_1("alpha beta", ["alpha beta"])                    # R=1.0000
+rouge_1("alpha beta", ["alpha beta", "gamma delta"])     # R=0.5000
+```
+
+Adding a second reference the candidate does not match **halves** the score. This
+is correct — with two humans disagreeing about what mattered, reproducing one of
+them covers half the reference material — but it means **ROUGE numbers are only
+comparable across summaries scored against the same reference set.** The bundled
+small clusters carry two references each and the large ones carry three, which is
+one of several reasons their scores are not directly comparable.
+
+### Recall, precision, or F1?
+
+The paper reports **recall at a fixed length budget**, and so does
+`lexrank evaluate`. The reason is visible the moment you sweep the budget on one
+cluster (`en/harbour-storm`, mean reference 542 bytes):
+
+| budget | sentences | actual | recall | precision | F1 |
+| --- | --- | --- | --- | --- | --- |
+| 300 B | 2 | 290 B | 0.3653 | 0.5980 | 0.4535 |
+| 665 B | 5 | 655 B | 0.5269 | 0.3860 | 0.4456 |
+| 1200 B | 9 | 1170 B | 0.6886 | 0.2995 | 0.4174 |
+| 2500 B | 20 | 2484 B | **0.8443** | 0.1762 | 0.2916 |
+
+Recall climbs monotonically toward 1.0 simply by writing more, so **a recall
+figure without a length budget is meaningless.** That is exactly why DUC fixed
+665 bytes and why the paper reports at that length. Precision falls as the
+summary grows past the reference length; F1 peaks somewhere in the middle and its
+peak moves with the reference length, which makes it awkward to compare across
+clusters.
+
+The rule this package follows: **fix the budget, report recall, and never compare
+two numbers produced at different budgets.**
+
+### Reading the demo output
+
+`lexrank demo -l en -n 2` prints the summary, then both scores:
+
+```
+==============================================================================
+en/asteroid-sample: Hesperus probe collects a sample from asteroid 4471 Odris
+5 documents, 30 sentences                    <- input size
+==============================================================================
+The Hesperus spacecraft completed a touch-and-go sampling manoeuvre at the
+asteroid 4471 Odris on Sunday, collecting an estimated 240 grams of surface
+material.
+Images released on Tuesday from the Hesperus spacecraft show the sampling head
+sinking into the surface of asteroid 4471 Odris, confirming that the body is a
+loosely bound rubble pile rather than solid rock.
+
+ROUGE-1 R=0.3931 P=0.5965 F1=0.4739         <- unigrams
+ROUGE-2 R=0.1988 P=0.3036 F1=0.2403         <- bigrams
+```
+
+Read it as: the two selected sentences reproduce **39 percent of the unigrams**
+in the pooled reference summaries, and **60 percent of what they say is material
+the references also wanted**. Precision exceeds recall here because `-n 2` is far
+shorter than the references — the summary is dense but partial. Ask for more
+sentences and the two numbers cross over.
+
+ROUGE-2 is always much lower than ROUGE-1 and that is normal, not a fault. Two
+summaries can share every word and no word *pair*: matching a bigram requires
+getting the phrasing right, which extractive summarization only does when it
+lifts the reference's own phrasing wholesale. Use ROUGE-2 as a fluency and
+phrasing signal, ROUGE-1 as a content signal.
+
+Note also that `demo` uses whatever budget you pass it (`-n`, `-w`, `-b`),
+so its numbers are **not** comparable to the evaluation table below unless you
+pass `-b 665`.
+
+### Reading the evaluation table
+
+`lexrank evaluate` fixes the budget at 665 bytes for every cluster and method,
+and prints **ROUGE-1 recall only**:
+
+```
+cluster                        lexrank  continuous      degree    centroid        lead      random
+sk/archeologicky-nalez          0.4626      0.4626      0.4626      0.4626      0.4354      0.4218
+sk/povoden-na-vrbnici           0.5224      0.5149      0.5149      0.5896      0.5896      0.3955
+sk/reforma-vysokych-skol        0.3767      0.3767      0.3767      0.3767      0.3767      0.4041
+sk/zeleznicny-koridor           0.3178      0.3178      0.3178      0.3209      0.2492      0.2492
+mean                            0.4199      0.4180      0.4180      0.4374      0.4127      0.3677
+```
+
+Identical values across methods in a row are real, not a bug: on a small cluster
+several centrality measures often select the same sentences, and the MEAD
+Position feature plus the byte budget make that more likely still. Compare
+**down** a column across clusters only with care, and **across** a row freely —
+the row holds the cluster, the references and the budget fixed, which is the only
+controlled comparison in the table.
+
+### What ROUGE cannot see
+
+**Word order.** ROUGE-1 is a bag of words. Shuffling a summary leaves it
+untouched:
+
+```python
+s = "the reservoir fell to nineteen percent of capacity on monday"
+rouge_1("reservoir percent of the monday nineteen capacity fell on to", [s])
+# R=1.0000  <- a perfect score for word salad
+rouge_2("reservoir percent of the monday nineteen capacity fell on to", [s])
+# R=0.1111  <- ROUGE-2 does notice
+```
+
+**Facts.** Reversing the meaning of a sentence barely moves the score:
+
+```python
+true_  = "Brackmere Reservoir fell to 19 percent of capacity, its lowest level since 1976."
+false_ = "Brackmere Reservoir rose to 91 percent of capacity, its highest level since 1976."
+rouge_1(false_, [true_])   # R=0.7692
+```
+
+Three words changed, the claim inverted, and 77 percent of the score survives.
+ROUGE is not a factuality metric and must never be used as one — which matters
+much more when scoring an abstractive model than this package, whose output is
+verbatim by construction.
+
+**Paraphrase and inflection.** Matching is on **surface forms**, following the
+original ROUGE default — no stemming, no stopword removal. `flooded` and
+`flooding` are different tokens. For English that costs almost nothing; for a
+heavily inflected language it costs real points. Measured on the two large
+clusters, comparing the shipped surface-form score against the same summary
+scored on stems:
+
+| cluster | surface recall | stem-matched recall | gain |
+| --- | --- | --- | --- |
+| `en/drought-emergency` | 0.3048 | 0.3052 | **+0.0004** |
+| `sk/zeleznicny-koridor` | 0.3178 | 0.3710 | **+0.0533** |
+
+**ROUGE-1 systematically understates Slovak by around five points** relative to
+English, purely because Slovak case endings make `koridoru` and `koridore` and
+`koridorom` three different tokens where English would have written *corridor*
+three times. Keep that in mind before reading anything into the English-versus-
+Slovak gap in the tables above; the summarizer's *own* matching is stem-based, so
+this is a measurement artefact, not a pipeline weakness.
+
+**Whether the summary is readable.** Nothing in ROUGE penalises a dangling
+pronoun, a duplicated fact, or an orphaned quotation. The
+`“You do not decide to lose a field,” he said.` sentence discussed under
+[demo datasets](#a-note-on-long-form-text) *raises* ROUGE while making the
+summary worse.
+
+### Using it on your own data
+
+```python
+from lexrank import rouge_1, rouge_2, rouge_n
+from lexrank.rouge import truncate_to_bytes
+
+rouge_1(summary, [human_a, human_b], language="sk")   # ROUGE-1
+rouge_2(summary, [human_a, human_b], language="sk")   # ROUGE-2
+rouge_n(summary, refs, n=3, language="en")            # any order
+rouge_1(summary, refs, max_bytes=665)                 # truncate first, DUC style
+```
+
+`max_bytes` truncates the candidate before scoring, on a character boundary, so
+multi-byte text is never cut mid-character:
+
+```python
+truncate_to_bytes("Modernizácia koridoru", 13)   # 'Modernizácia'
+```
+
+This implementation covers **ROUGE-N only** — the recall, precision and F1 of
+n-gram overlap, with clipped match counts and pooled references. It does not
+implement ROUGE-L (longest common subsequence), ROUGE-W or ROUGE-SU, and it does
+not replicate the original Perl script's stemming or stopword options. It is
+enough to reproduce the paper's evaluation methodology and to compare methods
+against each other; it is not a drop-in for a published ROUGE score.
+
+---
+
 ## LexRank and LLMs
 
 LexRank is from 2004. An LLM will write a **better summary** than it will —
@@ -529,10 +760,50 @@ the paper computes idf over.
 > and none of it is reporting on anything real. Each dataset file carries the
 > same notice in its `notice` field.
 
+### The reference summaries
+
+Every cluster ships human-style abstractive summaries in
+`cluster.reference_summaries`. They exist for one purpose: to be the denominator
+of a ROUGE score (see
+[Understanding the ROUGE scores](#understanding-the-rouge-scores)). Without
+them, `lexrank evaluate` and `lexrank demo` would have nothing to measure
+against.
+
+```python
+cluster = load_cluster("en", "drought-emergency")
+len(cluster.reference_summaries)   # 3
+rouge_1(summary.text, cluster.reference_summaries, language="en")
+```
+
+They are deliberately **abstractive** — they merge facts that appear in different
+sentences of different documents, and they use phrasing that appears nowhere in
+the source. That makes them a fair target (a real human summary looks like this)
+and an unreachable ceiling for an extractive method, which can only ever return
+sentences that already exist. An extractive summarizer will never score 1.0
+against them, and should not be expected to.
+
+Two properties matter for interpreting any score computed against them:
+
+| | small clusters | large clusters |
+| --- | --- | --- |
+| References per cluster | 2 | 3 |
+| Mean reference length | 545 bytes | 840 bytes |
+| Pooled reference material | ~1,090 bytes | ~2,520 bytes |
+
+Because references are **pooled** into a single ROUGE denominator, more
+references means a larger denominator and a lower recall for the same summary.
+Because the large clusters also have longer references, a fixed 665-byte budget
+covers proportionally less of them. Both effects push the large clusters' scores
+down for reasons that have nothing to do with summary quality — which is why the
+table below is split by cluster size rather than presented as one average.
+
 ### What the corpus shows — and doesn't
 
 ROUGE-1 recall at a 665-byte budget, `random` averaged over 25 seeds
-(`lexrank evaluate`):
+(`lexrank evaluate`). See
+[Understanding the ROUGE scores](#understanding-the-rouge-scores) for how to
+read these, and in particular why a recall figure is meaningless without the
+budget attached:
 
 | method | all 8 | 6 small | 2 large |
 | --- | --- | --- | --- |
