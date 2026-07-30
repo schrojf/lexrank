@@ -23,6 +23,7 @@ uv run lexrank demo -l en
 - [What it's for](#what-its-for) · [Strengths and weaknesses](#strengths-and-weaknesses)
 - [Usage](#usage) · [Command line](#command-line) · [Worked examples](#worked-examples)
 - [Understanding the ROUGE scores](#understanding-the-rouge-scores)
+- [Choosing a length](#choosing-a-length) — and why a fixed budget wins
 - [LexRank and LLMs](#lexrank-and-llms) — replace, or combine
 - [Reproducing the paper](#reproducing-the-paper) · [Demo datasets](#demo-datasets)
 - [Language support](#language-support) · [Performance](#performance)
@@ -756,6 +757,158 @@ implement ROUGE-L (longest common subsequence), ROUGE-W or ROUGE-SU, and it does
 not replicate the original Perl script's stemming or stopword options. It is
 enough to reproduce the paper's evaluation methodology and to compare methods
 against each other; it is not a drop-in for a published ROUGE score.
+
+---
+
+## Choosing a length
+
+The paper never addresses this: it fixes 665 bytes because DUC 2004 did. So what
+do you pass when you genuinely do not know how long the summary should be?
+
+**The short answer is that a fixed budget is hard to beat, and I tried.** This
+section reports the measurements, then describes the helper that ships — which
+does something more modest than picking an optimal length, because nothing I
+tested could.
+
+### What was measured
+
+For each bundled cluster I computed ROUGE-1 **F1** at every possible sentence
+count and found the true optimum. F1 rather than recall, because recall rises
+monotonically with length and so cannot tell you when to stop, while F1 has a
+genuine peak. Then I scored candidate heuristics by how much F1 they give up
+against that per-cluster optimum:
+
+| rule | mean F1 loss | worst |
+| --- | --- | --- |
+| **fixed 665-byte budget** | **0.031** | **0.067** |
+| centroid coverage ≥ 0.50 | 0.084 | — |
+| knee of the coverage curve | 0.091 | — |
+| centroid coverage ≥ 0.66 | 0.130 | — |
+| redundancy saturation | 0.211 | — |
+
+The dumbest rule won, and not narrowly. Adding the content-derived caps on top
+of the byte budget changed the result by **exactly nothing** — `min(fill, knee,
+saturation)` also scores 0.031, because the budget was the binding constraint on
+every single cluster.
+
+### Why the simple rule wins
+
+Because the F1-optimal length is a fact about the **reference**, not about the
+input. Across the eight clusters the optimum varies:
+
+| measured at the F1 optimum | range | relative spread |
+| --- | --- | --- |
+| sentences | 3 – 11 | — |
+| compression ratio (summary/source bytes) | 0.028 – 0.400 | **0.63** |
+| centroid coverage | 0.149 – 0.617 | 0.39 |
+| **absolute bytes** | **517 – 1320** | **0.35** |
+
+Absolute length is the *most* stable quantity and compression ratio is by far the
+least. So the intuitive rule — "take 10% of the sentences" — is the worst
+available: it varies fourteen-fold across this corpus, because a 208-sentence
+cluster is mostly restatement and needs proportionally far less than a
+30-sentence one.
+
+Which vindicates the paper's arbitrary-looking constant. **How long a summary
+should be is mostly a fact about the reader's patience, not about how much input
+there is.** Pick the length your UI, your reader, or your downstream model wants,
+and pass it.
+
+### The helper
+
+Given all that, `suggest_length` does not try to out-guess a budget. It does
+three things that are actually useful:
+
+1. **Converts a budget into the unit you think in**, using your data's own
+   sentence lengths — "665 bytes" becomes "5 sentences *for this cluster*".
+2. **Reports the ceiling** — how many mutually non-redundant sentences exist at
+   all, so you never pad a summary with restatement.
+3. **Warns when the input cannot be ranked**, which is the failure that actually
+   costs you something.
+
+```python
+from lexrank import LexRankSummarizer
+from lexrank.datasets import build_idf, load_cluster
+
+cluster = load_cluster("en", "harbour-storm")
+summarizer = LexRankSummarizer("en", idf=build_idf("en"))
+print(summarizer.suggest_length(cluster.documents))
+```
+
+There is also a one-call `suggest_length(documents, "en")`, but note it derives
+IDF from the input alone, while the CLI uses the bundled background corpus — so
+the two report slightly different figures for the same cluster. The output below
+is the CLI's.
+
+```console
+$ uv run lexrank suggest -d harbour-storm
+5 sentences (~118 words, ~702 bytes) of 36, bound by 665-byte budget
+  coverage 36% of centroid mass; 33 non-redundant sentences available; diminishing returns at 16
+  ! 5 sentences comes to 702 bytes, over the 665-byte target: a sentence-count
+    budget takes the top N whole, while a byte budget skips oversized
+    candidates. Use max_bytes=665 if the limit is hard.
+```
+
+That last warning is the honest part: converting a byte budget into a sentence
+count cannot be exact, because `-n 5` takes five whole sentences while `-b 665`
+skips any that do not fit. If the limit is hard, use the byte budget directly.
+
+The fields are all inspectable:
+
+```python
+s = summarizer.suggest_length(cluster.documents)
+s.sentences, s.words, s.bytes      # the recommendation, three ways
+s.total_sentences, s.non_redundant # input size, and the useful ceiling
+s.coverage                         # centroid mass the recommendation covers
+s.diminishing_returns              # knee of the coverage curve
+s.discriminates                    # False => LexRank can't rank this input
+s.bound_by, s.notes                # which constraint bound it, and caveats
+```
+
+Use it as the budget with `sentences=None`, or `--auto` on the CLI:
+
+```python
+summarize(cluster.documents, "en", sentences=None)
+```
+
+```bash
+uv run lexrank summarize -d harbour-storm --auto
+```
+
+### The warning that earns its keep
+
+On a single document the recommendation is unremarkable but the notes are not:
+
+```console
+5 sentences (~96 words, ~598 bytes) of 8, bound by 665-byte budget
+  coverage 68% of centroid mass; 8 non-redundant sentences available; diminishing returns at 4
+  ! centrality is nearly uniform (spread 1.00x) — LexRank cannot rank this
+    input; selection is driven by the Position feature alone. Add more documents.
+  ! only 8 sentences — too few for centrality to mean much
+```
+
+`spread 1.00x` means every sentence scored *identically* — the uniform-graph
+degeneracy described under
+[strengths and weaknesses](#strengths-and-weaknesses). The summary you get back
+is the lead baseline wearing a LexRank costume. Nothing else in the pipeline
+tells you this, and it is the single most useful thing the helper reports.
+
+### When content signals do matter
+
+Not for readable summaries, but for **pre-filtering**, where the goal is to
+retain material rather than to be brief. There, "how much do I keep?" genuinely
+is a content question, and `target_coverage` answers it:
+
+```console
+$ uv run lexrank suggest -l sk -d zeleznicny-koridor --target-coverage 0.5
+38 sentences (~781 words, ~5682 bytes) of 196, bound by coverage >= 50%
+  coverage 51% of centroid mass; 144 non-redundant sentences available; diminishing returns at 48
+```
+
+38 of 196 sentences carry half the cluster's centroid mass — a 5× reduction
+before anything downstream sees it. That is the number worth having for the
+[LLM pre-filter pattern](#where-they-combine); a byte budget is the wrong tool
+for it.
 
 ---
 

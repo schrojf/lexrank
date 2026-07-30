@@ -28,6 +28,7 @@ from .centrality import (
 from .centroid import centroid_scores, centroid_vector
 from .idf import IdfModel
 from .languages import Language, available_languages, get_language, register_language
+from .length import LengthSuggestion, coverage_curve, knee_point, non_redundant_count
 from .rouge import RougeScore, rouge_1, rouge_2, rouge_n
 from .similarity import idf_modified_cosine, similarity_matrix, tfidf_matrix
 from .summarizer import (
@@ -35,6 +36,7 @@ from .summarizer import (
     LexRankSummarizer,
     Ranking,
     Summary,
+    suggest_length,
     summarize,
 )
 from .tokenization import (
@@ -48,12 +50,13 @@ from .tokenization import (
 __version__ = "0.1.0"
 
 __all__ = [
+    "ConvergenceError",
     "DEFAULT_DAMPING",
     "DEFAULT_THRESHOLD",
     "DUC_BYTE_BUDGET",
-    "ConvergenceError",
     "IdfModel",
     "Language",
+    "LengthSuggestion",
     "LexRankSummarizer",
     "Ranking",
     "RougeScore",
@@ -65,10 +68,13 @@ __all__ = [
     "centroid_scores",
     "centroid_vector",
     "content_tokens",
+    "coverage_curve",
     "degree_centrality",
     "get_language",
     "idf_modified_cosine",
+    "knee_point",
     "lexrank_scores",
+    "non_redundant_count",
     "normalize_max",
     "normalize_minmax",
     "power_method",
@@ -79,6 +85,7 @@ __all__ = [
     "similarity_matrix",
     "split_sentences",
     "stochastic_matrix",
+    "suggest_length",
     "summarize",
     "tfidf_matrix",
     "tokenize_words",

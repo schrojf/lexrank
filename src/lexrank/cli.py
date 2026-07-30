@@ -48,7 +48,14 @@ def _make_summarizer(args: argparse.Namespace, language: str) -> LexRankSummariz
     )
 
 
-def _budget(args: argparse.Namespace) -> dict[str, int | None]:
+def _budget(
+    args: argparse.Namespace,
+    summarizer: LexRankSummarizer | None = None,
+    documents: list | None = None,
+) -> dict[str, int | None]:
+    if getattr(args, "auto", False) and summarizer is not None:
+        suggestion = summarizer.suggest_length(documents or [])
+        return {"max_sentences": max(1, suggestion.sentences)}
     if args.bytes is not None:
         return {"max_bytes": args.bytes}
     if args.words is not None:
@@ -75,8 +82,32 @@ def cmd_summarize(args: argparse.Namespace) -> int:
         documents = [("stdin", text)]
 
     summarizer = _make_summarizer(args, args.language)
-    summary = summarizer.summarize(documents, **_budget(args))  # type: ignore[arg-type]
+    budget = _budget(args, summarizer, documents)
+    summary = summarizer.summarize(documents, **budget)  # type: ignore[arg-type]
     _print_summary(summary, show_scores=args.scores)
+    return 0
+
+
+def cmd_suggest(args: argparse.Namespace) -> int:
+    """Recommend a summary length for an input, and show the evidence."""
+    if args.dataset:
+        documents: list = list(load_cluster(args.language, args.dataset).documents)
+    elif args.files:
+        documents = [(p, open(p, encoding="utf-8").read()) for p in args.files]
+    else:
+        text = sys.stdin.read()
+        if not text.strip():
+            print("no input: pass files, --dataset, or pipe text on stdin",
+                  file=sys.stderr)
+            return 2
+        documents = [("stdin", text)]
+
+    summarizer = _make_summarizer(args, args.language)
+    print(summarizer.suggest_length(
+        documents,
+        target_bytes=args.target_bytes,
+        target_coverage=args.target_coverage,
+    ))
     return 0
 
 
@@ -140,7 +171,8 @@ def cmd_demo(args: argparse.Namespace) -> int:
     for language, cluster_id in available_clusters(args.language):
         cluster = load_cluster(language, cluster_id)
         summarizer = _make_summarizer(args, language)
-        summary = summarizer.summarize(cluster.documents, **_budget(args))  # type: ignore[arg-type]
+        budget = _budget(args, summarizer, list(cluster.documents))
+        summary = summarizer.summarize(cluster.documents, **budget)  # type: ignore[arg-type]
 
         print("=" * 78)
         print(f"{language}/{cluster_id}: {cluster.title}")
@@ -221,6 +253,8 @@ def build_parser() -> argparse.ArgumentParser:
         group.add_argument("-n", "--sentences", type=int, default=5)
         group.add_argument("-w", "--words", type=int)
         group.add_argument("-b", "--bytes", type=int)
+        group.add_argument("--auto", action="store_true",
+                           help="let suggest_length pick the sentence count")
 
     summarize = subparsers.add_parser("summarize", help="summarize files, stdin or a bundled cluster")
     summarize.add_argument("files", nargs="*", help="input files; one cluster")
@@ -229,6 +263,18 @@ def build_parser() -> argparse.ArgumentParser:
     add_model_options(summarize)
     add_budget_options(summarize)
     summarize.set_defaults(func=cmd_summarize)
+
+    suggest = subparsers.add_parser(
+        "suggest", help="recommend a summary length for an input"
+    )
+    suggest.add_argument("files", nargs="*")
+    suggest.add_argument("-l", "--language", default="en", choices=available_languages())
+    suggest.add_argument("-d", "--dataset", help="bundled cluster id instead of files")
+    suggest.add_argument("--target-bytes", type=int, default=DUC_BYTE_BUDGET)
+    suggest.add_argument("--target-coverage", type=float,
+                         help="recommend for this centroid coverage instead")
+    add_model_options(suggest)
+    suggest.set_defaults(func=cmd_suggest)
 
     datasets = subparsers.add_parser("datasets", help="list the bundled demo clusters")
     datasets.add_argument("-l", "--language", choices=available_languages())

@@ -120,3 +120,57 @@ def test_paper_reproduction_command(capsys) -> None:
 def test_no_command_is_an_error() -> None:
     with pytest.raises(SystemExit):
         main([])
+
+
+# -- suggest / --auto ------------------------------------------------------
+
+
+def test_suggest_a_bundled_cluster(capsys) -> None:
+    output = run(capsys, "suggest", "-d", "harbour-storm")
+    assert "sentences" in output and "coverage" in output
+    assert "non-redundant" in output
+
+
+def test_suggest_slovak(capsys) -> None:
+    output = run(capsys, "suggest", "-l", "sk", "-d", "zeleznicny-koridor")
+    assert "sentences" in output
+
+
+def test_suggest_with_coverage_target(capsys) -> None:
+    output = run(capsys, "suggest", "-d", "harbour-storm", "--target-coverage", "0.8")
+    assert "coverage >= 80%" in output
+
+
+def test_suggest_warns_on_unrankable_input(capsys, tmp_path) -> None:
+    path = tmp_path / "one.txt"
+    path.write_text(
+        "The river burst its banks on Tuesday morning and flooded the lower town. "
+        "Emergency services evacuated four thousand residents during the night. "
+        "The water reached its highest level since records began in 1878.",
+        encoding="utf-8",
+    )
+    output = run(capsys, "suggest", str(path))
+    assert "cannot rank" in output
+
+
+def test_suggest_empty_stdin_fails(monkeypatch) -> None:
+    import io
+
+    monkeypatch.setattr("sys.stdin", io.StringIO("   "))
+    assert main(["suggest"]) == 2
+
+
+def test_summarize_auto(capsys) -> None:
+    auto = run(capsys, "summarize", "-d", "harbour-storm", "--auto")
+    from lexrank import suggest_length
+    from lexrank.datasets import load_cluster
+
+    expected = suggest_length(
+        load_cluster("en", "harbour-storm").documents, "en"
+    ).sentences
+    assert len(auto.strip().splitlines()) == expected
+
+
+def test_auto_is_mutually_exclusive_with_other_budgets() -> None:
+    with pytest.raises(SystemExit):
+        main(["summarize", "-d", "harbour-storm", "--auto", "-n", "3"])

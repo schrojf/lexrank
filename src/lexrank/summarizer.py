@@ -35,6 +35,13 @@ from .centrality import (
 from .centroid import centroid_scores
 from .idf import IdfModel
 from .languages import Language, get_language
+from .length import (
+    LengthSuggestion,
+    centrality_spread,
+    coverage_curve,
+    knee_point,
+    non_redundant_count,
+)
 from .similarity import similarity_matrix
 from .tokenization import Sentence, build_sentences
 
@@ -61,6 +68,14 @@ class Ranking:
         """Eligible sentence indices, best score first, ties broken by order."""
         candidates = [i for i in range(len(self.sentences)) if self.eligible[i]]
         return sorted(candidates, key=lambda i: (-self.score[i], i))
+
+    def coverage_curve(self) -> np.ndarray:
+        """Cumulative centroid-mass coverage as sentences are taken in rank order."""
+        return coverage_curve(
+            [sentence.tokens for sentence in self.sentences],
+            self.idf,
+            self.ordered_indices(),
+        )
 
     def __len__(self) -> int:
         return len(self.sentences)
@@ -308,6 +323,109 @@ class LexRankSummarizer:
                 selected = [ordered[0]]
         return selected
 
+    # -- length suggestion (an extension; the paper fixes 665 bytes) ---------
+
+    def suggest_length(
+        self,
+        documents: Iterable[str] | Iterable[tuple[str, str]],
+        *,
+        target_bytes: int = DUC_BYTE_BUDGET,
+        target_coverage: float | None = None,
+    ) -> LengthSuggestion:
+        """Recommend a summary length for this input, with the evidence.
+
+        This is **not** an attempt to beat a fixed byte budget — on the bundled
+        corpus nothing does; see :mod:`lexrank.length`. It converts a budget
+        into a sentence count using your data's own sentence lengths, caps it
+        at the number of non-redundant sentences that actually exist, and warns
+        when the input cannot be ranked.
+
+        Args:
+            target_bytes: Budget to convert. Defaults to the paper's 665.
+            target_coverage: If given, recommend the smallest number of
+                sentences reaching this fraction of centroid mass instead of
+                converting a byte budget. Use for pre-filtering, where the goal
+                is to retain material rather than to produce a readable
+                summary.
+        """
+        ranking = self.rank(documents)
+        if not ranking.sentences:
+            return LengthSuggestion(
+                sentences=0, words=0, bytes=0, total_sentences=0, non_redundant=0,
+                diminishing_returns=0, coverage=0.0, discriminates=False,
+                bound_by="empty input", notes=["no sentences in input"],
+            )
+
+        order = ranking.ordered_indices()
+        curve = ranking.coverage_curve()
+        knee = knee_point(curve)
+        ceiling = non_redundant_count(
+            ranking.similarity,
+            order,
+            1.0 if self.reranker_threshold is None else self.reranker_threshold,
+        )
+
+        if target_coverage is not None:
+            reached = np.flatnonzero(curve >= target_coverage)
+            wanted = int(reached[0]) + 1 if reached.size else len(order)
+            bound_by = f"coverage >= {target_coverage:.0%}"
+        else:
+            wanted = len(self._select(ranking, None, None, target_bytes))
+            bound_by = f"{target_bytes}-byte budget"
+
+        sentences = max(1, min(wanted, ceiling))
+        if sentences < wanted:
+            bound_by = "non-redundant ceiling"
+
+        selected = self._select(ranking, sentences, None, None)
+        text = " ".join(ranking.sentences[i].text for i in sorted(selected))
+        size = len(text.encode("utf-8"))
+        spread = centrality_spread(ranking.centrality)
+
+        # Coverage of what would actually be selected, not of the rank-order
+        # prefix -- the reranker may have skipped past a redundant sentence.
+        rank_of = {index: position for position, index in enumerate(order)}
+        covered = coverage_curve(
+            [sentence.tokens for sentence in ranking.sentences],
+            ranking.idf,
+            sorted(selected, key=lambda i: rank_of.get(i, len(order))),
+        )
+
+        notes: list[str] = []
+        if target_coverage is None and size > target_bytes * 1.05:
+            notes.append(
+                f"{sentences} sentences comes to {size} bytes, over the "
+                f"{target_bytes}-byte target: a sentence-count budget takes the "
+                "top N whole, while a byte budget skips oversized candidates. "
+                f"Use max_bytes={target_bytes} if the limit is hard."
+            )
+        if spread < 1.1:
+            notes.append(
+                "centrality is nearly uniform (spread "
+                f"{spread:.2f}x) — LexRank cannot rank this input; selection is "
+                "driven by the Position feature alone. Add more documents."
+            )
+        if len(ranking.sentences) < 10:
+            notes.append(
+                f"only {len(ranking.sentences)} sentences — too few for "
+                "centrality to mean much"
+            )
+        if sentences >= len(order):
+            notes.append("the budget covers the whole input; no summarizing to do")
+
+        return LengthSuggestion(
+            sentences=len(selected),
+            words=sum(ranking.sentences[i].word_count for i in selected),
+            bytes=size,
+            total_sentences=len(ranking.sentences),
+            non_redundant=ceiling,
+            diminishing_returns=knee,
+            coverage=float(covered[-1]) if covered.size else 0.0,
+            discriminates=spread >= 1.1,
+            bound_by=bound_by,
+            notes=notes,
+        )
+
     def _is_redundant(
         self, index: int, selected: Sequence[int], ranking: Ranking
     ) -> bool:
@@ -324,11 +442,39 @@ def summarize(
     documents: Iterable[str] | Iterable[tuple[str, str]] | str,
     language: str | Language = "en",
     *,
-    sentences: int = 5,
+    sentences: int | None = 5,
     **options: object,
 ) -> Summary:
-    """Convenience wrapper: summarize a cluster (or a single string) in one call."""
+    """Convenience wrapper: summarize a cluster (or a single string) in one call.
+
+    Pass ``sentences=None`` to let :meth:`LexRankSummarizer.suggest_length`
+    choose the length.
+    """
+    if isinstance(documents, str):
+        documents = [documents]
+    documents = list(documents)
+    summarizer = LexRankSummarizer(language, **options)  # type: ignore[arg-type]
+    if sentences is None:
+        sentences = max(1, summarizer.suggest_length(documents).sentences)
+    return summarizer.summarize(documents, max_sentences=sentences)
+
+
+def suggest_length(
+    documents: Iterable[str] | Iterable[tuple[str, str]] | str,
+    language: str | Language = "en",
+    *,
+    target_bytes: int = DUC_BYTE_BUDGET,
+    target_coverage: float | None = None,
+    **options: object,
+) -> LengthSuggestion:
+    """Recommend a summary length for a cluster in one call.
+
+    See :meth:`LexRankSummarizer.suggest_length` for what the recommendation is
+    and is not based on.
+    """
     if isinstance(documents, str):
         documents = [documents]
     summarizer = LexRankSummarizer(language, **options)  # type: ignore[arg-type]
-    return summarizer.summarize(documents, max_sentences=sentences)
+    return summarizer.suggest_length(
+        documents, target_bytes=target_bytes, target_coverage=target_coverage
+    )
