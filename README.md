@@ -495,19 +495,30 @@ the latter.
 
 ## Demo datasets
 
-Six clusters, three per language, shaped like DUC Task 2 inputs: five documents
-covering one event from different angles, plus two reference summaries each for
+Eight clusters, four per language, shaped like DUC Task 2 inputs: several
+documents covering one event from different angles, plus reference summaries for
 ROUGE. The cross-document redundancy is the signal LexRank exploits; the
 outlet-specific detail is the noise it has to ignore.
 
-| Language | Cluster | Subject |
-| --- | --- | --- |
-| en | `harbour-storm` | A storm surge floods a port town |
-| en | `rate-decision` | A central bank raises its benchmark rate |
-| en | `asteroid-sample` | A probe samples an asteroid |
-| sk | `povoden-na-vrbnici` | Povodeň zaplavila dolnú časť mesta |
-| sk | `reforma-vysokych-skol` | Nová metodika financovania vysokých škôl |
-| sk | `archeologicky-nalez` | Mohylové pohrebisko z doby bronzovej |
+| Language | Cluster | Docs | Sentences | Subject |
+| --- | --- | --- | --- | --- |
+| en | `harbour-storm` | 5 | 36 | A storm surge floods a port town |
+| en | `rate-decision` | 5 | 34 | A central bank raises its benchmark rate |
+| en | `asteroid-sample` | 5 | 30 | A probe samples an asteroid |
+| en | **`drought-emergency`** | **8** | **208** | Drought, a water regulator investigation, and fifty years of unbuilt infrastructure |
+| sk | `povoden-na-vrbnici` | 5 | 36 | Povodeň zaplavila dolnú časť mesta |
+| sk | `reforma-vysokych-skol` | 5 | 34 | Nová metodika financovania vysokých škôl |
+| sk | `archeologicky-nalez` | 5 | 34 | Mohylové pohrebisko z doby bronzovej |
+| sk | **`zeleznicny-koridor`** | **8** | **196** | Modernizácia trate: audit, arbitráž, eurofondy |
+
+The two bold clusters are **full newspaper length** — eight articles of 600–900
+words each, written to read like real coverage, with three reference summaries
+apiece. They exist because a 36-sentence cluster does not exercise the same
+behaviour: at 200 sentences the O(n²) path, the byte budget, the reranker and the
+segmenter all start to matter. Each has the multi-angle structure real coverage
+has (breaking news, the institution under scrutiny, politics, the affected
+sector, expert explainer, human interest, economics, analysis), so the repeated
+core facts and the outlet-specific detail are genuinely separable.
 
 Each language also ships a general-language background corpus used to estimate
 IDF (`build_idf`), standing in for the "much larger and similar genre data set"
@@ -518,17 +529,56 @@ the paper computes idf over.
 > and none of it is reporting on anything real. Each dataset file carries the
 > same notice in its `notice` field.
 
-Six small clusters demonstrate the algorithm; they cannot replicate the paper's
-DUC evaluation. On this corpus, ROUGE-1 recall at a 665-byte budget averages:
+### What the corpus shows — and doesn't
 
-| continuous | lexrank | degree | centroid | lead | random |
-| --- | --- | --- | --- | --- | --- |
-| 0.509 | 0.498 | 0.491 | 0.490 | 0.479 | 0.476 |
+ROUGE-1 recall at a 665-byte budget, `random` averaged over 25 seeds
+(`lexrank evaluate`):
 
-(`random` averaged over 25 seeds.) The ordering matches the paper's finding that
-graph-based centrality beats centroid, which beats the lead and random
-baselines — but with six clusters the gaps are well inside the noise. Reproduce
-with `lexrank evaluate`.
+| method | all 8 | 6 small | 2 large |
+| --- | --- | --- | --- |
+| centroid | **0.4742** | **0.5196** | **0.3381** |
+| continuous | 0.4616 | 0.5033 | 0.3365 |
+| lexrank | 0.4468 | 0.4920 | 0.3113 |
+| degree | 0.4407 | 0.4838 | 0.3113 |
+| lead | 0.4346 | 0.4871 | 0.2770 |
+| random | 0.4210 | 0.4768 | 0.2535 |
+
+Three honest observations:
+
+**Centroid beats the graph methods here, which is not what the paper found.**
+Eight synthetic clusters cannot settle that disagreement — the paper evaluated on
+30 to 50 real DUC clusters against four human summaries each, and reported that
+the difference between Centroid and the graph methods was itself not obvious on
+DUC 2003. Treat this corpus as a demonstration that the pipeline works, not as
+evidence about which centrality measure is better.
+
+**The margin over the baselines widens with cluster size.** On the small clusters
+LexRank beats `lead` by 0.005 — noise. On the large ones it beats `lead` by 0.034
+and `random` by 0.058. That is the expected direction: the lead of a 7-sentence
+wire story more or less *is* the summary, while the lead of a 30-sentence feature
+is a scene-setter. Redundancy-based centrality has more to work with, and
+position has less.
+
+**Adding the two large clusters moved every number, including for the small
+ones.** `build_idf` fits on the background corpus *plus* every cluster, so
+growing the corpus changed the IDF model and therefore all the scores. Earlier
+revisions of this file quoted centroid at 0.490 on the six small clusters; it is
+0.5196 against the current IDF. Term weighting is not a detail.
+
+### A note on long-form text
+
+The default `length_cutoff=9` is the paper's value, tuned on newswire. On
+full-length articles it lets through short quotation sentences that are
+lexically distinctive but meaningless once extracted — `“You do not decide to
+lose a field,” he said.` reached one summary of `drought-emergency` this way,
+because the byte budget had room only for something short. Raising the cutoff to
+15 removes them and reads better, at a small ROUGE cost (0.3048 → 0.2895 on that
+cluster) because the metric rewards the extra tokens regardless of whether they
+mean anything:
+
+```bash
+lexrank summarize -d drought-emergency -b 665 --length-cutoff 15
+```
 
 ---
 
@@ -576,12 +626,14 @@ register_language(Language(
 Measured on one core, including tokenization, stemming, IDF, the full similarity
 matrix, and the power method:
 
-| Sentences | `rank()` | Similarity matrix |
-| --- | --- | --- |
-| 36 | 8 ms | 10 KB |
-| 144 | 30 ms | 0.2 MB |
-| 576 | 192 ms | 2.7 MB |
-| 2,304 | 772 ms | 42.5 MB |
+| Sentences | `rank()` | Similarity matrix | |
+| --- | --- | --- | --- |
+| 36 | 8 ms | 10 KB | `harbour-storm` |
+| 144 | 30 ms | 0.2 MB | |
+| 196 | 140 ms | 300 KB | `zeleznicny-koridor` |
+| 208 | 115 ms | 338 KB | `drought-emergency` |
+| 576 | 192 ms | 2.7 MB | |
+| 2,304 | 772 ms | 42.5 MB | |
 
 Both time and memory are **O(n²)** in the sentence count — the dense similarity
 matrix dominates. Around 10,000 sentences the matrix alone is ~800 MB, which is
@@ -594,7 +646,7 @@ threshold and use a sparse representation, or pre-cluster the documents.
 
 ```bash
 uv sync --all-extras
-uv run pytest          # 292 tests
+uv run pytest          # 302 tests
 ```
 
 ## Layout
