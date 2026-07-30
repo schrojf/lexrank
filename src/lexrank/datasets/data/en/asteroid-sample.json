@@ -1,0 +1,37 @@
+{
+  "id": "asteroid-sample",
+  "language": "en",
+  "title": "Hesperus probe collects a sample from asteroid 4471 Odris",
+  "notice": "Synthetic text written for this package. The spacecraft, the asteroid, the agency and the researchers named here are invented; this is not a report about any real mission.",
+  "documents": [
+    {
+      "id": "d1",
+      "source": "science wire",
+      "text": "The Hesperus spacecraft completed a touch-and-go sampling manoeuvre at the asteroid 4471 Odris on Sunday, collecting an estimated 240 grams of surface material. Mission controllers at the Levenhall operations centre confirmed that contact lasted about six seconds. The asteroid, roughly 560 metres across, is a carbon-rich body thought to preserve material from the earliest solar system. Project scientist Nadia Ferrer said the sample is more than four times the mission's minimum requirement of 50 grams. Hesperus will depart Odris in March and is scheduled to return the capsule to Earth in late 2029. Early images show the surface is far looser than models predicted, with the sampling head sinking several centimetres."
+    },
+    {
+      "id": "d2",
+      "source": "research roundup",
+      "text": "Scientists said on Monday that the Hesperus mission has secured about 240 grams of material from asteroid 4471 Odris, comfortably above the 50 grams needed to meet its objectives. The spacecraft touched the surface for roughly six seconds on Sunday before firing its thrusters to back away. Telemetry indicates the sampling head sank several centimetres into unexpectedly loose regolith. Project scientist Nadia Ferrer described the surface as behaving more like a fluid than a solid. The 560-metre asteroid is carbon-rich and may hold organic compounds and hydrated minerals from the early solar system. The return capsule is due to land in late 2029."
+    },
+    {
+      "id": "d3",
+      "source": "planetary science analysis",
+      "text": "Images released on Tuesday from the Hesperus spacecraft show the sampling head sinking into the surface of asteroid 4471 Odris, confirming that the body is a loosely bound rubble pile rather than solid rock. The six-second contact on Sunday collected an estimated 240 grams of material. Researchers had expected a firmer surface, and the finding will force revisions to models of how small asteroids hold themselves together. Understanding that structure matters for planetary defence, because deflecting a rubble pile is a very different problem from deflecting a monolith. Project scientist Nadia Ferrer said the team would publish a full analysis next year. Hesperus departs the asteroid in March for a return to Earth in late 2029."
+    },
+    {
+      "id": "d4",
+      "source": "agency statement coverage",
+      "text": "The space agency confirmed on Monday that the Hesperus capsule will return to Earth in late 2029, carrying roughly 240 grams of asteroid 4471 Odris. Half of the sample will be distributed to laboratories in eleven countries and the remainder kept sealed for future study. The material was collected during a six-second touchdown on Sunday, during which the sampling head sank into loose surface regolith. Carbon-rich asteroids such as the 560-metre Odris are of interest because they may preserve organic compounds from before the planets formed. Project scientist Nadia Ferrer said the quantity exceeded expectations. The spacecraft leaves the asteroid in March."
+    },
+    {
+      "id": "d5",
+      "source": "mission background",
+      "text": "Hesperus launched six years ago on a mission that was never guaranteed to work. Its target, the 560-metre carbon-rich asteroid 4471 Odris, had been observed only from Earth, and the spacecraft carried no way to test the surface before touching it. On Sunday it made contact for about six seconds and lifted away with an estimated 240 grams of material, against a minimum requirement of 50 grams. The sampling head sank several centimetres into regolith far looser than any of the pre-launch models had assumed. Project scientist Nadia Ferrer said the team had prepared for a hard surface and got something closer to a fluid. The capsule is scheduled to return to Earth in late 2029, and half of the sample will go to laboratories in eleven countries."
+    }
+  ],
+  "reference_summaries": [
+    "The Hesperus spacecraft touched asteroid 4471 Odris for about six seconds on Sunday and collected an estimated 240 grams of material, well above the mission's 50-gram minimum. The sampling head sank several centimetres into unexpectedly loose regolith, confirming that the 560-metre carbon-rich body is a rubble pile rather than solid rock, a finding that will revise models of small asteroid structure and matters for planetary defence. Hesperus leaves the asteroid in March and the capsule returns to Earth in late 2029, with half the sample going to laboratories in eleven countries.",
+    "Hesperus completed a six-second touch-and-go sampling of the 560-metre carbon-rich asteroid 4471 Odris on Sunday, securing roughly 240 grams against a 50-gram requirement. Project scientist Nadia Ferrer said the surface behaved more like a fluid than a solid, with the sampling head sinking several centimetres into loose regolith. The asteroid may preserve organic compounds and hydrated minerals from the early solar system. The spacecraft departs in March and the return capsule is due to land in late 2029."
+  ]
+}

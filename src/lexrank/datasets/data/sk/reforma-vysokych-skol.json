@@ -1,0 +1,37 @@
+{
+  "id": "reforma-vysokych-skol",
+  "language": "sk",
+  "title": "Návrh novej metodiky financovania vysokých škôl",
+  "notice": "Synteticky vytvorený text pre potreby tejto knižnice. Inštitúcie aj osoby sú vymyslené; nejde o opis skutočnej reformy ani skutočného ministerstva.",
+  "documents": [
+    {
+      "id": "d1",
+      "source": "spravodajstvo",
+      "text": "Ministerstvo školstva predstavilo v stredu návrh novej metodiky financovania vysokých škôl. Podľa návrhu by od budúceho akademického roka tvorila výkonnostná zložka tridsať percent dotácie namiesto doterajších desiatich. Hodnotiť sa má uplatnenie absolventov na trhu práce, počet publikácií v karentovaných časopisoch a objem získaných grantov. Rektorská konferencia návrh kritizovala a upozornila, že menšie regionálne školy môžu prísť až o pätinu rozpočtu. Minister Juraj Halász uviedol, že cieľom je odmeniť kvalitu, a nie počet zapísaných študentov. Pripomienkové konanie potrvá do konca februára. Novú metodiku by malo schvaľovať aj vládne legislatívne oddelenie."
+    },
+    {
+      "id": "d2",
+      "source": "reakcie rektorov",
+      "text": "Rektori vysokých škôl varujú, že nová metodika financovania ohrozí menšie regionálne univerzity. Ministerstvo školstva navrhuje zvýšiť výkonnostnú zložku dotácie z desiatich na tridsať percent. Podľa prepočtov Rektorskej konferencie by osem z dvadsiatich verejných vysokých škôl prišlo o viac než desatinu rozpočtu, v najhoršom prípade až o pätinu. Rektor Univerzity v Zálesí Ivan Krupa povedal, že škola by musela zrušiť tri študijné programy. Minister Juraj Halász trvá na tom, že reforma odmení kvalitu. Pripomienkové konanie sa končí koncom februára. Rektori žiadajú, aby sa zmena zaviedla postupne."
+    },
+    {
+      "id": "d3",
+      "source": "študentské organizácie",
+      "text": "Študentské organizácie žiadajú, aby sa do novej metodiky financovania vysokých škôl zaradilo aj hodnotenie kvality výučby. Návrh ministerstva školstva zvyšuje výkonnostnú zložku dotácie na tridsať percent, hodnotí však najmä publikácie, granty a uplatnenie absolventov. Predsedníčka Študentskej rady Lucia Bartošová uviedla, že bez merania kvality výučby budú školy motivované sústrediť sa iba na výskum. Ministerstvo pripustilo, že o doplnení kritéria je ochotné rokovať. Rektorská konferencia zároveň upozorňuje na riziko pre menšie regionálne školy. Pripomienkové konanie potrvá do konca februára. Podľa Bartošovej chýba v návrhu aj hodnotenie dostupnosti ubytovania."
+    },
+    {
+      "id": "d4",
+      "source": "analytický komentár",
+      "text": "Analytici oceňujú zámer prepojiť financovanie vysokých škôl s výkonom, upozorňujú však na kvalitu použitých ukazovateľov. Ministerstvo školstva chce od budúceho akademického roka zvýšiť výkonnostnú zložku dotácie z desiatich na tridsať percent. Podľa inštitútu pre vzdelávaciu politiku môže dôraz na počet publikácií viesť k umelému deleniu výsledkov do viacerých článkov. Analytici odporúčajú zavádzať reformu postupne počas troch rokov. Rektorská konferencia varuje, že menšie regionálne školy prídu až o pätinu rozpočtu. Minister Juraj Halász označil tieto obavy za prehnané. Skúsenosti z iných krajín podľa inštitútu ukazujú, že náhla zmena metodiky vedie k rušeniu študijných programov."
+    },
+    {
+      "id": "d5",
+      "source": "rozhovor s ministrom",
+      "text": "Minister školstva Juraj Halász obhajuje návrh, podľa ktorého by výkonnostná zložka dotácie vysokých škôl stúpla z desiatich na tridsať percent. Tvrdí, že doterajší systém odmeňoval počet zapísaných študentov a nie kvalitu, a že to školy motivovalo prijímať uchádzačov bez ohľadu na ich predpoklady. Na výhradu Rektorskej konferencie, že menšie regionálne školy prídu až o pätinu rozpočtu, odpovedal, že prepočty vychádzajú z najhoršieho možného scenára. Pripustil však, že o postupnom zavádzaní počas troch rokov je ochotný rokovať. K požiadavke študentských organizácií doplniť hodnotenie kvality výučby povedal, že vhodný ukazovateľ zatiaľ neexistuje. Pripomienkové konanie potrvá do konca februára."
+    }
+  ],
+  "reference_summaries": [
+    "Ministerstvo školstva navrhuje od budúceho akademického roka zvýšiť výkonnostnú zložku dotácie vysokých škôl z desiatich na tridsať percent, pričom hodnotiť sa má uplatnenie absolventov, publikácie a granty. Rektorská konferencia varuje, že osem z dvadsiatich verejných vysokých škôl by prišlo o viac než desatinu a menšie regionálne školy až o pätinu rozpočtu. Študentské organizácie žiadajú doplniť hodnotenie kvality výučby. Minister Juraj Halász obavy odmieta, pripúšťa však postupné zavádzanie. Pripomienkové konanie potrvá do konca februára.",
+    "Návrh novej metodiky financovania vysokých škôl zvyšuje výkonnostnú zložku dotácie na tridsať percent namiesto doterajších desiatich. Rektori upozorňujú, že menšie regionálne univerzity môžu prísť až o pätinu rozpočtu a že by museli rušiť študijné programy. Analytici zámer oceňujú, no varujú, že dôraz na počet publikácií vedie k umelému deleniu výsledkov, a odporúčajú zavádzať zmenu postupne počas troch rokov. Minister Juraj Halász trvá na tom, že reforma odmení kvalitu, a nie počet zapísaných študentov."
+  ]
+}

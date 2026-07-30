@@ -1,0 +1,37 @@
+{
+  "id": "harbour-storm",
+  "language": "en",
+  "title": "Storm Mairead floods the port of Aldren Bay",
+  "notice": "Synthetic text written for this package. The storm, the town, the organisations and the people named here are invented; this is not a report about any real event.",
+  "documents": [
+    {
+      "id": "d1",
+      "source": "local daily",
+      "text": "Storm Mairead came ashore at Aldren Bay shortly before dawn on Tuesday, driving a two-metre surge over the harbour wall and flooding the whole of the lower town. Emergency services evacuated more than four thousand residents from the districts of Quayside and Mill Row during the night. The regional council said seven people were treated for minor injuries and that no deaths had been reported. Winds gusting to 140 kilometres per hour tore the roof from the ferry terminal and brought down power lines across the peninsula. By midday roughly eighteen thousand households were without electricity. Harbour master Elin Prosser said the surge was the highest recorded since the port opened in 1878. Council leader Tomas Bekker told reporters that the flood defences approved four years ago had not yet been built. Volunteers set up a relief centre in the sports hall on Fenner Road, where about six hundred people spent the night."
+    },
+    {
+      "id": "d2",
+      "source": "national wire service",
+      "text": "More than four thousand people were evacuated from the port town of Aldren Bay early on Tuesday as Storm Mairead pushed a two-metre storm surge over the harbour wall. The national meteorological office had issued a red warning for the coast on Monday evening, but many residents said they received no direct alert. Power was lost to about eighteen thousand households across the peninsula after winds of up to 140 kilometres per hour brought down transmission lines. No deaths have been confirmed, though seven people were treated for minor injuries. Ferry services to the offshore islands were suspended indefinitely after the terminal roof was destroyed. The government said it would release emergency funds within the week. Forecasters expect a second, weaker system to reach the coast on Friday."
+    },
+    {
+      "id": "d3",
+      "source": "business desk",
+      "text": "Insurers expect claims from Storm Mairead to exceed 300 million euro, most of it from the flooded lower town of Aldren Bay. The two-metre surge that overtopped the harbour wall on Tuesday morning inundated some nine hundred commercial premises. The Association of Regional Insurers said the figure could rise once damage to the ferry terminal and the fish processing plants has been assessed. Analysts noted that the flood defences approved by the council four years ago remain unbuilt, which may complicate the settlement of some claims. Shares in the port operator Aldren Maritime fell eleven percent. The company said it hoped to reopen a single berth within ten days. Roughly nine hundred people are employed at the port and in the processing plants behind it."
+    },
+    {
+      "id": "d4",
+      "source": "political correspondent",
+      "text": "Pressure mounted on the regional council on Wednesday over flood defences that were approved four years ago but never built. Storm Mairead sent a two-metre surge over the harbour wall at Aldren Bay on Tuesday, flooding the lower town and forcing the evacuation of more than four thousand residents. Council leader Tomas Bekker confirmed that the scheme had been delayed twice by procurement disputes. Opposition members called for an independent inquiry into the delay. The environment ministry said it would review the coastal protection programme nationally. Bekker rejected calls to resign, saying the priority was restoring power to the eighteen thousand households still cut off. An engineering assessment commissioned in the first year of the scheme had warned that the existing wall would be overtopped by a surge of two metres or more."
+    },
+    {
+      "id": "d5",
+      "source": "weekend feature",
+      "text": "A week after Storm Mairead, the lower town of Aldren Bay is still drying out. Shopkeepers on Quayside have stacked ruined stock on the pavement, and the smell of diesel from the flooded boatyard hangs over the streets. More than four thousand residents were evacuated when the two-metre surge came over the harbour wall, and several hundred are still in temporary accommodation. Power has been restored to all but a few hundred of the eighteen thousand households that lost it. Harbour master Elin Prosser said the port had survived worse winds but never a higher tide. The unbuilt flood defences, approved four years ago, are now the subject of an independent inquiry. Council leader Tomas Bekker has promised that construction will begin before the next winter."
+    }
+  ],
+  "reference_summaries": [
+    "Storm Mairead drove a two-metre surge over the harbour wall at Aldren Bay before dawn on Tuesday, flooding the lower town and forcing more than four thousand residents to evacuate. Winds of 140 kilometres per hour cut power to some eighteen thousand households and destroyed the ferry terminal roof. Seven people were treated for minor injuries and no deaths were reported. Insurers expect claims above 300 million euro. The regional council faces an independent inquiry over flood defences approved four years ago that were never built.",
+    "A two-metre storm surge from Storm Mairead overtopped the harbour wall at Aldren Bay on Tuesday morning, inundating the lower town and prompting the evacuation of over four thousand people. About eighteen thousand households lost power and the ferry terminal was wrecked. Insurance claims are put at more than 300 million euro, with some nine hundred commercial premises flooded. Council leader Tomas Bekker acknowledged that approved flood defences had been delayed by procurement disputes, and opposition members demanded an independent inquiry."
+  ]
+}

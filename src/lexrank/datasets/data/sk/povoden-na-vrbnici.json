@@ -1,0 +1,37 @@
+{
+  "id": "povoden-na-vrbnici",
+  "language": "sk",
+  "title": "Povodeň na rieke Vrbnica zaplavila Dolné Lužany",
+  "notice": "Synteticky vytvorený text pre potreby tejto knižnice. Rieka, mesto, organizácie aj osoby sú vymyslené; nejde o správu o skutočnej udalosti.",
+  "documents": [
+    {
+      "id": "d1",
+      "source": "mestské noviny",
+      "text": "Rieka Vrbnica sa v utorok nadránom vyliala z koryta a zaplavila dolnú časť mesta Dolné Lužany. Hasiči evakuovali vyše tisícdvesto obyvateľov z ulíc Nábrežná a Mlynská. Hladina rieky dosiahla 612 centimetrov, čo je najviac od roku 1974. Podľa hovorcu krajského hasičského zboru Petra Ondriša zasahovalo v meste devätnásť jednotiek. Bez elektriny zostalo približne tritisíc domácností. Primátor Dolných Lužian Marek Slávik vyhlásil tretí stupeň povodňovej aktivity. Škody na mestskom majetku odhaduje samospráva najmenej na štyri milióny eur. V telocvični na Športovej ulici zriadili núdzové ubytovanie pre dvesto ľudí."
+    },
+    {
+      "id": "d2",
+      "source": "celoštátna agentúra",
+      "text": "Vyše tisícdvesto ľudí museli v utorok evakuovať z Dolných Lužian po tom, čo sa rieka Vrbnica vyliala z koryta. Hladina rieky vystúpila na 612 centimetrov, teda na najvyššiu úroveň od roku 1974. Hydrometeorologický ústav vydal výstrahu tretieho stupňa už v pondelok večer, viacerí obyvatelia však tvrdia, že sa k nim varovanie nedostalo. Voda zaplavila dolnú časť mesta vrátane ulíc Nábrežná a Mlynská. Približne tritisíc domácností zostalo bez dodávky elektriny. Doprava na ceste prvej triedy medzi Dolnými Lužanmi a Zálesím je prerušená. Nikto neutrpel vážne zranenia."
+    },
+    {
+      "id": "d3",
+      "source": "ekonomická rubrika",
+      "text": "Poisťovne očakávajú, že škody po povodni na Vrbnici presiahnu dvadsať miliónov eur. Najviac postihnutá je dolná časť Dolných Lužian, kde voda zaliala vyše štyristo domov a osemdesiat prevádzok. Asociácia poisťovní uviedla, že konečná suma bude známa až po odčerpaní vody z pivníc. Projekt protipovodňovej ochrany mesta zostal pre spory vo verejnom obstarávaní nezrealizovaný. Mnohé z poškodených budov nemali uzatvorené poistenie proti záplavám. Mesto žiada vládu o mimoriadnu finančnú pomoc. V zaplavených prevádzkach pracovalo približne šesťsto ľudí."
+    },
+    {
+      "id": "d4",
+      "source": "politický komentár",
+      "text": "Na primátora Dolných Lužian Mareka Slávika rastie tlak pre nedokončenú protipovodňovú ochranu. Rieka Vrbnica sa v utorok vyliala z koryta a zaplavila dolnú časť mesta, odkiaľ museli evakuovať vyše tisícdvesto obyvateľov. Projekt hrádze schválilo mestské zastupiteľstvo ešte pred štyrmi rokmi, práce sa však pre spory vo verejnom obstarávaní nezačali. Opoziční poslanci žiadajú nezávislé vyšetrovanie odkladu. Slávik odmietol výzvy na odstúpenie a povedal, že prioritou je obnovenie dodávky elektriny pre tritisíc domácností. Ministerstvo životného prostredia oznámilo, že preverí celý program protipovodňovej ochrany. Posudok z roku, keď sa projekt schvaľoval, varoval, že súčasné koryto nezvládne prietok pri hladine nad 600 centimetrov."
+    },
+    {
+      "id": "d5",
+      "source": "reportáž po týždni",
+      "text": "Týždeň po povodni sa dolná časť Dolných Lužian ešte stále vysušuje. Pred domami na Nábrežnej ulici stoja kopy zničeného nábytku a z pivníc odčerpávajú vodu poslednými čerpadlami. Z mesta evakuovali vyše tisícdvesto ľudí, niekoľko desiatok z nich je stále v núdzovom ubytovaní. Elektrinu už obnovili takmer všetkým z tritisíc domácností, ktoré o ňu prišli. Hladina Vrbnice dosiahla 612 centimetrov, najviac od roku 1974. Nedokončená protipovodňová hrádza, schválená pred štyrmi rokmi, je teraz predmetom nezávislého vyšetrovania. Primátor Marek Slávik sľúbil, že stavba sa začne ešte pred budúcou zimou."
+    }
+  ],
+  "reference_summaries": [
+    "Rieka Vrbnica sa v utorok nadránom vyliala z koryta a zaplavila dolnú časť Dolných Lužian. Hladina dosiahla 612 centimetrov, najviac od roku 1974, a evakuovať museli vyše tisícdvesto obyvateľov. Bez elektriny zostalo približne tritisíc domácností a nikto neutrpel vážne zranenia. Poisťovne odhadujú škody na viac ako dvadsať miliónov eur. Primátor Marek Slávik čelí tlaku pre protipovodňovú hrádzu, ktorú zastupiteľstvo schválilo pred štyrmi rokmi, no pre spory vo verejnom obstarávaní sa nezačala stavať.",
+    "Po vyliatí rieky Vrbnica zaplavila voda v utorok dolnú časť mesta Dolné Lužany vrátane ulíc Nábrežná a Mlynská. Hasiči evakuovali vyše tisícdvesto ľudí a tritisíc domácností zostalo bez elektriny. Hladina rieky vystúpila na 612 centimetrov, najvyššiu úroveň od roku 1974. Voda zaliala vyše štyristo domov a osemdesiat prevádzok a škody presiahnu dvadsať miliónov eur. Opoziční poslanci žiadajú nezávislé vyšetrovanie nedokončenej protipovodňovej ochrany."
+  ]
+}

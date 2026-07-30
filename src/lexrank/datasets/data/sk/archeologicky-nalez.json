@@ -1,0 +1,37 @@
+{
+  "id": "archeologicky-nalez",
+  "language": "sk",
+  "title": "Mohylové pohrebisko z doby bronzovej pri Vrbnických Sadoch",
+  "notice": "Synteticky vytvorený text pre potreby tejto knižnice. Obec, nálezisko, inštitúcie aj osoby sú vymyslené; nejde o opis skutočného archeologického výskumu.",
+  "documents": [
+    {
+      "id": "d1",
+      "source": "spravodajstvo",
+      "text": "Archeológovia objavili pri obci Vrbnické Sady mohylové pohrebisko z mladšej doby bronzovej. Výskum zatiaľ odkryl dvadsaťsedem mohýl, z toho štrnásť s nenarušenou pohrebnou komorou. V najväčšej z nich sa našiel bronzový meč, tri náramky a keramická nádoba so zvyškami obilnín. Vedúci výskumu Martin Zeman datuje nálezisko približne do rokov 1200 až 900 pred naším letopočtom. Lokalitu objavili pri príprave stavby obchvatu obce, ktorá je momentálne pozastavená. Nálezy poputujú do krajského múzea v Zálesí. Výskum sa začal začiatkom mája."
+    },
+    {
+      "id": "d2",
+      "source": "kultúrna rubrika",
+      "text": "Pri obci Vrbnické Sady sa našlo mohylové pohrebisko s dvadsiatimi siedmimi mohylami z mladšej doby bronzovej. Štrnásť pohrebných komôr zostalo nenarušených, čo je podľa archeológov mimoriadne zriedkavé. Medzi nálezmi je bronzový meč, náramky a keramika so zvyškami obilnín. Výskum vedie Martin Zeman z krajského múzea v Zálesí, ktorý lokalitu datuje do rokov 1200 až 900 pred naším letopočtom. Pohrebisko odkryli pri príprave stavby obchvatu obce. Stavebné práce sú zatiaľ pozastavené. Podobné pohrebisko sa v kraji naposledy skúmalo pred vyše tridsiatimi rokmi."
+    },
+    {
+      "id": "d3",
+      "source": "regionálne spravodajstvo",
+      "text": "Stavba obchvatu obce Vrbnické Sady je pozastavená pre archeologický nález. Pri zemných prácach odkryli mohylové pohrebisko z mladšej doby bronzovej s dvadsiatimi siedmimi mohylami. Cestná spoločnosť odhaduje, že záchranný výskum predĺži výstavbu najmenej o osem mesiacov. Vedúci výskumu Martin Zeman uviedol, že štrnásť komôr je nenarušených a nález má nadregionálny význam. Obec žiada, aby sa trasa obchvatu posunula a lokalita zostala zachovaná. O ďalšom postupe rozhodne krajský pamiatkový úrad. Náklady na záchranný výskum znáša investor stavby."
+    },
+    {
+      "id": "d4",
+      "source": "odborný komentár",
+      "text": "Bronzový meč z pohrebiska pri Vrbnických Sadoch je podľa odborníkov najlepšie zachovaným exemplárom svojho typu na území kraja. Meč sa našiel v najväčšej z dvadsiatich siedmich mohýl, ktoré archeológovia odkryli pri príprave obchvatu obce. Spolu s ním ležali tri bronzové náramky a keramická nádoba so zvyškami obilnín. Vedúci výskumu Martin Zeman datuje pohrebisko do rokov 1200 až 900 pred naším letopočtom. Predmety budú po konzervovaní vystavené v krajskom múzeu v Zálesí. Záchranný výskum potrvá podľa odhadov ešte osem mesiacov. Zloženie zvyškov obilnín má analyzovať laboratórium v Zálesí."
+    },
+    {
+      "id": "d5",
+      "source": "rozhovor s vedúcim výskumu",
+      "text": "Archeológ Martin Zeman vedie výskum mohylového pohrebiska pri Vrbnických Sadoch, ktoré odkryli pri príprave stavby obchvatu. Hovorí, že zo dvadsiatich siedmich mohýl je štrnásť s nenarušenou pohrebnou komorou, a práve to robí z lokality nález nadregionálneho významu. Pohrebisko datuje do rokov 1200 až 900 pred naším letopočtom, teda do mladšej doby bronzovej. Za najcennejší predmet považuje bronzový meč z najväčšej mohyly, pri ktorom ležali aj tri náramky a keramická nádoba so zvyškami obilnín. Záchranný výskum podľa neho potrvá ešte približne osem mesiacov a stavba obchvatu zostane dovtedy pozastavená. Nálezy sa po konzervovaní dostanú do krajského múzea v Zálesí."
+    }
+  ],
+  "reference_summaries": [
+    "Pri obci Vrbnické Sady odkryli archeológovia počas prípravy stavby obchvatu mohylové pohrebisko z mladšej doby bronzovej s dvadsiatimi siedmimi mohylami, z ktorých štrnásť má nenarušenú pohrebnú komoru. V najväčšej mohyle sa našiel bronzový meč, tri náramky a keramická nádoba so zvyškami obilnín. Vedúci výskumu Martin Zeman datuje lokalitu do rokov 1200 až 900 pred naším letopočtom a považuje ju za nález nadregionálneho významu. Záchranný výskum potrvá ešte osem mesiacov a stavba obchvatu je pozastavená. Nálezy poputujú do krajského múzea v Zálesí.",
+    "Mohylové pohrebisko z mladšej doby bronzovej pri Vrbnických Sadoch obsahuje dvadsaťsedem mohýl a štrnásť nenarušených pohrebných komôr, čo je podľa archeológov mimoriadne zriedkavé. Bronzový meč z najväčšej mohyly je najlepšie zachovaným exemplárom svojho typu v kraji. Lokalitu objavili pri zemných prácach na obchvate obce, ktorý je pre záchranný výskum pozastavený najmenej o osem mesiacov. Obec žiada posunutie trasy a o ďalšom postupe rozhodne krajský pamiatkový úrad."
+  ]
+}

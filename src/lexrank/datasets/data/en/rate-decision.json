@@ -1,0 +1,37 @@
+{
+  "id": "rate-decision",
+  "language": "en",
+  "title": "Reserve Bank of Calloway raises its benchmark rate to 4.75 percent",
+  "notice": "Synthetic text written for this package. Calloway, its central bank, the firms and the people named here are invented; none of this describes a real institution or decision.",
+  "documents": [
+    {
+      "id": "d1",
+      "source": "wire report",
+      "text": "The Reserve Bank of Calloway raised its benchmark interest rate by half a percentage point to 4.75 percent on Thursday, the sixth increase in a year. Governor Marta Ivens said the board judged that underlying inflation, at 5.2 percent, remained too far above the two percent target. The decision was not unanimous: two of the nine board members preferred a quarter-point rise. Ivens told a press conference that further tightening should not be assumed and that the board would be guided by the data. The currency strengthened sharply against the dollar after the announcement. Mortgage lenders are expected to pass on the increase within days. The next rate decision is due in seven weeks."
+    },
+    {
+      "id": "d2",
+      "source": "economics desk",
+      "text": "Borrowing costs in Calloway rose again on Thursday as the central bank lifted its benchmark rate half a point to 4.75 percent. It was the sixth rise in twelve months and takes the rate to its highest level since 2008. The bank pointed to underlying inflation of 5.2 percent, well above its two percent target, and to a labour market it described as still unusually tight. Two of the nine board members dissented in favour of a smaller quarter-point move. Governor Marta Ivens declined to signal the path of future decisions, saying the board would be guided by the data. Households on variable-rate mortgages face an average increase of around forty euro a month. Unemployment has stayed near a fifty-year low throughout the tightening cycle."
+    },
+    {
+      "id": "d3",
+      "source": "markets report",
+      "text": "Calloway's currency rose more than one percent against the dollar on Thursday after the Reserve Bank delivered a larger-than-expected half-point rate increase to 4.75 percent. Money markets had priced roughly a sixty percent chance of a quarter-point move. Bond yields jumped, with the two-year note reaching its highest level in fifteen years. Analysts at Renner Capital said the split board vote, two of nine preferring a smaller rise, suggested the tightening cycle is near its end. Governor Marta Ivens repeated that the board would be guided by the data rather than a preset path. Equity markets closed slightly lower, with bank shares the main exception. Underlying inflation was last reported at 5.2 percent."
+    },
+    {
+      "id": "d4",
+      "source": "business reaction",
+      "text": "Business groups criticised the Reserve Bank of Calloway on Thursday after it raised its benchmark rate by half a percentage point to 4.75 percent, the sixth increase in a year. The Federation of Small Enterprises said the pace of tightening risked pushing the economy into an unnecessary recession. The bank defended the move, noting that underlying inflation remains at 5.2 percent against a two percent target. Governor Marta Ivens acknowledged the strain on borrowers but said allowing inflation to persist would be worse. Two of the nine board members had argued for a quarter-point rise instead. Mortgage holders on variable rates will pay about forty euro a month more. Retail sales have fallen in four of the last six months."
+    },
+    {
+      "id": "d5",
+      "source": "analysis column",
+      "text": "The half-point move to 4.75 percent tells you less about where Calloway's interest rates are going than the vote behind it does. Two of nine board members wanted a quarter point, the widest split of the cycle, and Governor Marta Ivens went out of her way to say that further tightening should not be assumed. Underlying inflation at 5.2 percent is still far from the two percent target, but it has now fallen for three consecutive months. The labour market remains tight and unemployment is near a fifty-year low, which is the main argument for going further. Against that, retail sales have fallen in four of the last six months and households on variable-rate mortgages are already paying about forty euro a month more. The board's next decision, in seven weeks, is genuinely open."
+    }
+  ],
+  "reference_summaries": [
+    "The Reserve Bank of Calloway raised its benchmark interest rate by half a percentage point to 4.75 percent on Thursday, the sixth increase in a year and the highest level since 2008. The bank cited underlying inflation of 5.2 percent against a two percent target and a still-tight labour market. Two of the nine board members preferred a quarter-point rise. Governor Marta Ivens said further tightening should not be assumed. The currency and bond yields rose, while business groups warned the pace of tightening risked a recession.",
+    "Calloway's central bank lifted its benchmark rate half a point to 4.75 percent, the sixth rise in twelve months, pointing to underlying inflation of 5.2 percent against its two percent target. The board split two to seven, with the minority favouring a quarter-point move, which analysts read as a sign the tightening cycle is near its end. Governor Marta Ivens said the board would be guided by the data. Variable-rate mortgage holders face about forty euro a month more, and small business groups criticised the decision."
+  ]
+}
