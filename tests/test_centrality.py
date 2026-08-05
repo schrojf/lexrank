@@ -89,15 +89,11 @@ def test_power_method_rejects_out_of_range_damping(chain: np.ndarray) -> None:
 
 def test_power_method_can_raise_on_non_convergence(chain: np.ndarray) -> None:
     with pytest.raises(ConvergenceError):
-        power_method(
-            stochastic_matrix(chain), tolerance=1e-30, max_iterations=3, strict=True
-        )
+        power_method(stochastic_matrix(chain), tolerance=1e-30, max_iterations=3, strict=True)
 
 
 def test_power_method_returns_last_iterate_by_default(chain: np.ndarray) -> None:
-    scores = power_method(
-        stochastic_matrix(chain), tolerance=1e-30, max_iterations=3
-    )
+    scores = power_method(stochastic_matrix(chain), tolerance=1e-30, max_iterations=3)
     assert scores.sum() == pytest.approx(1.0)
 
 

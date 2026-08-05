@@ -34,6 +34,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import override
 
 import numpy as np
 
@@ -77,6 +78,7 @@ class LengthSuggestion:
     bound_by: str
     notes: list[str] = field(default_factory=list)
 
+    @override
     def __str__(self) -> str:
         head = (
             f"{self.sentences} sentences (~{self.words} words, ~{self.bytes} bytes) "
@@ -132,9 +134,7 @@ def knee_point(curve: np.ndarray) -> int:
     return int(np.argmax(normalized - np.linspace(0.0, 1.0, n))) + 1
 
 
-def non_redundant_count(
-    similarity: np.ndarray, order: Sequence[int], threshold: float
-) -> int:
+def non_redundant_count(similarity: np.ndarray, order: Sequence[int], threshold: float) -> int:
     """How many sentences survive the redundancy filter with no length budget."""
     chosen: list[int] = []
     for index in order:

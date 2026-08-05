@@ -47,11 +47,7 @@ def _contains_vowel(stem: str) -> bool:
 
 
 def _ends_double_consonant(stem: str) -> bool:
-    return (
-        len(stem) >= 2
-        and stem[-1] == stem[-2]
-        and _is_consonant(stem, len(stem) - 1)
-    )
+    return len(stem) >= 2 and stem[-1] == stem[-2] and _is_consonant(stem, len(stem) - 1)
 
 
 def _ends_cvc(stem: str) -> bool:
@@ -77,22 +73,58 @@ def _replace(word: str, suffix: str, replacement: str, min_measure: int) -> str 
 
 
 _STEP2 = (
-    ("ational", "ate"), ("tional", "tion"), ("enci", "ence"), ("anci", "ance"),
-    ("izer", "ize"), ("bli", "ble"), ("alli", "al"), ("entli", "ent"),
-    ("eli", "e"), ("ousli", "ous"), ("ization", "ize"), ("ation", "ate"),
-    ("ator", "ate"), ("alism", "al"), ("iveness", "ive"), ("fulness", "ful"),
-    ("ousness", "ous"), ("aliti", "al"), ("iviti", "ive"), ("biliti", "ble"),
+    ("ational", "ate"),
+    ("tional", "tion"),
+    ("enci", "ence"),
+    ("anci", "ance"),
+    ("izer", "ize"),
+    ("bli", "ble"),
+    ("alli", "al"),
+    ("entli", "ent"),
+    ("eli", "e"),
+    ("ousli", "ous"),
+    ("ization", "ize"),
+    ("ation", "ate"),
+    ("ator", "ate"),
+    ("alism", "al"),
+    ("iveness", "ive"),
+    ("fulness", "ful"),
+    ("ousness", "ous"),
+    ("aliti", "al"),
+    ("iviti", "ive"),
+    ("biliti", "ble"),
     ("logi", "log"),
 )
 
 _STEP3 = (
-    ("icate", "ic"), ("ative", ""), ("alize", "al"), ("iciti", "ic"),
-    ("ical", "ic"), ("ful", ""), ("ness", ""),
+    ("icate", "ic"),
+    ("ative", ""),
+    ("alize", "al"),
+    ("iciti", "ic"),
+    ("ical", "ic"),
+    ("ful", ""),
+    ("ness", ""),
 )
 
 _STEP4 = (
-    "al", "ance", "ence", "er", "ic", "able", "ible", "ant", "ement", "ment",
-    "ent", "ou", "ism", "ate", "iti", "ous", "ive", "ize",
+    "al",
+    "ance",
+    "ence",
+    "er",
+    "ic",
+    "able",
+    "ible",
+    "ant",
+    "ement",
+    "ment",
+    "ent",
+    "ou",
+    "ism",
+    "ate",
+    "iti",
+    "ous",
+    "ive",
+    "ize",
 )
 
 
@@ -181,31 +213,86 @@ def porter_stem(word: str) -> str:
 
 # Ordered longest-first; each entry is (minimum stem length kept, suffix).
 _SK_CASE_SUFFIXES = (
-    (6, "ejsieho"), (6, "ejsiemu"),
-    (5, "atoch"), (5, "iiach"), (5, "ejsie"), (5, "ejsia"), (5, "ejsim"),
-    (4, "ovia"), (4, "iach"), (4, "iami"), (4, "ieho"), (4, "iemu"),
-    (4, "ymi"), (4, "ich"), (4, "ach"), (4, "ami"), (4, "emi"), (4, "eho"),
-    (4, "emu"), (4, "ymu"), (4, "ych"), (4, "ove"), (4, "ovi"), (4, "ovu"),
-    (4, "ovy"), (4, "ami"), (4, "och"), (4, "iam"), (4, "iat"), (4, "ata"),
-    (4, "ovom"), (4, "ejsi"),
-    (3, "om"), (3, "ou"), (3, "mi"), (3, "em"), (3, "im"), (3, "ym"),
-    (3, "ej"), (3, "ie"), (3, "ia"), (3, "iu"), (3, "ov"), (3, "ho"),
-    (3, "mu"), (3, "am"), (3, "us"), (3, "os"), (3, "es"), (3, "at"),
+    (6, "ejsieho"),
+    (6, "ejsiemu"),
+    (5, "atoch"),
+    (5, "iiach"),
+    (5, "ejsie"),
+    (5, "ejsia"),
+    (5, "ejsim"),
+    (4, "ovia"),
+    (4, "iach"),
+    (4, "iami"),
+    (4, "ieho"),
+    (4, "iemu"),
+    (4, "ymi"),
+    (4, "ich"),
+    (4, "ach"),
+    (4, "ami"),
+    (4, "emi"),
+    (4, "eho"),
+    (4, "emu"),
+    (4, "ymu"),
+    (4, "ych"),
+    (4, "ove"),
+    (4, "ovi"),
+    (4, "ovu"),
+    (4, "ovy"),
+    (4, "ami"),
+    (4, "och"),
+    (4, "iam"),
+    (4, "iat"),
+    (4, "ata"),
+    (4, "ovom"),
+    (4, "ejsi"),
+    (3, "om"),
+    (3, "ou"),
+    (3, "mi"),
+    (3, "em"),
+    (3, "im"),
+    (3, "ym"),
+    (3, "ej"),
+    (3, "ie"),
+    (3, "ia"),
+    (3, "iu"),
+    (3, "ov"),
+    (3, "ho"),
+    (3, "mu"),
+    (3, "am"),
+    (3, "us"),
+    (3, "os"),
+    (3, "es"),
+    (3, "at"),
     # Single-vowel endings keep at least three characters, so "pre" survives
     # while "mesta" still reduces to "mest".
-    (3, "a"), (3, "e"), (3, "i"), (3, "o"), (3, "u"), (3, "y"),
+    (3, "a"),
+    (3, "e"),
+    (3, "i"),
+    (3, "o"),
+    (3, "u"),
+    (3, "y"),
 )
 
 _SK_POSSESSIVE = ((5, "ovsk"), (5, "insk"), (4, "ov"), (4, "in"))
 
 _SK_PALATALISATION = (
-    ("ci", "k"), ("ce", "k"), ("ci", "k"), ("ck", "sk"),
-    ("zi", "h"), ("ze", "h"), ("zk", "sk"),
-    ("chi", "ch"), ("che", "ch"),
-    ("si", "sk"), ("se", "sk"),
-    ("ti", "t"), ("te", "t"),
-    ("di", "d"), ("de", "d"),
-    ("ni", "n"), ("ne", "n"),
+    ("ci", "k"),
+    ("ce", "k"),
+    ("ci", "k"),
+    ("ck", "sk"),
+    ("zi", "h"),
+    ("ze", "h"),
+    ("zk", "sk"),
+    ("chi", "ch"),
+    ("che", "ch"),
+    ("si", "sk"),
+    ("se", "sk"),
+    ("ti", "t"),
+    ("te", "t"),
+    ("di", "d"),
+    ("de", "d"),
+    ("ni", "n"),
+    ("ne", "n"),
 )
 
 

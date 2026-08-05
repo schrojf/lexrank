@@ -35,9 +35,7 @@ class ConvergenceError(RuntimeError):
     """The power method did not converge within the iteration budget."""
 
 
-def adjacency_matrix(
-    similarity: np.ndarray, threshold: float = DEFAULT_THRESHOLD
-) -> np.ndarray:
+def adjacency_matrix(similarity: np.ndarray, threshold: float = DEFAULT_THRESHOLD) -> np.ndarray:
     """Binarize a similarity matrix.
 
     Algorithm 3 uses a strict ``>`` comparison, which is reproduced here.
@@ -45,9 +43,7 @@ def adjacency_matrix(
     return (np.asarray(similarity, dtype=np.float64) > threshold).astype(np.float64)
 
 
-def degree_centrality(
-    similarity: np.ndarray, threshold: float = DEFAULT_THRESHOLD
-) -> np.ndarray:
+def degree_centrality(similarity: np.ndarray, threshold: float = DEFAULT_THRESHOLD) -> np.ndarray:
     """Degree of every node in the thresholded graph (Section 3.1).
 
     Self links count, matching Table 1 of the paper: "there should also be self
@@ -129,9 +125,7 @@ def power_method(
             return p
 
     if strict:
-        raise ConvergenceError(
-            f"power method did not converge in {max_iterations} iterations"
-        )
+        raise ConvergenceError(f"power method did not converge in {max_iterations} iterations")
     return p
 
 
@@ -155,9 +149,7 @@ def lexrank_scores(
     Returns:
         The stationary distribution; scores sum to 1.
     """
-    transition = stochastic_matrix(
-        similarity, threshold=threshold, continuous=continuous
-    )
+    transition = stochastic_matrix(similarity, threshold=threshold, continuous=continuous)
     return power_method(
         transition,
         damping=damping,

@@ -16,6 +16,7 @@ import math
 from collections import Counter
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
+from typing import override
 
 from .languages import Language, get_language
 from .tokenization import content_tokens
@@ -89,7 +90,7 @@ class IdfModel:
         summarizer will."""
         lang = get_language(language)
         return cls.from_token_documents(
-            (content_tokens(text, lang, **token_options) for text in documents),  # type: ignore[arg-type]
+            (content_tokens(text, lang, **token_options) for text in documents),  # pyright: ignore[reportArgumentType]
             smoothing=smoothing,
         )
 
@@ -123,6 +124,7 @@ class IdfModel:
     def __len__(self) -> int:
         return len(self._document_frequencies)
 
+    @override
     def __repr__(self) -> str:
         return (
             f"IdfModel(terms={len(self)}, n_documents={self.n_documents}, "
@@ -141,8 +143,8 @@ class IdfModel:
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> IdfModel:
         return cls(
-            payload["document_frequencies"],  # type: ignore[arg-type]
-            int(payload["n_documents"]),  # type: ignore[arg-type]
+            payload["document_frequencies"],  # pyright: ignore[reportArgumentType]
+            int(payload["n_documents"]),  # pyright: ignore[reportArgumentType]
             smoothing=str(payload.get("smoothing", "paper")),
         )
 

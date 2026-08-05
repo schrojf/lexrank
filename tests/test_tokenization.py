@@ -7,7 +7,6 @@ import pytest
 from lexrank import build_sentences, content_tokens, split_sentences, tokenize_words
 from lexrank.languages import get_language, strip_diacritics
 
-
 # -- English ---------------------------------------------------------------
 
 
@@ -46,9 +45,7 @@ def test_paragraph_break_ends_a_sentence_without_a_terminator() -> None:
 
 
 def test_single_newline_is_only_whitespace() -> None:
-    assert split_sentences("One long\nsentence here.", "en") == [
-        "One long sentence here."
-    ]
+    assert split_sentences("One long\nsentence here.", "en") == ["One long sentence here."]
 
 
 # -- Slovak ----------------------------------------------------------------
@@ -117,9 +114,7 @@ def test_content_tokens_slovak() -> None:
 
 
 def test_content_tokens_can_skip_stemming_and_stopwords() -> None:
-    tokens = content_tokens(
-        "The rivers flooded", "en", remove_stopwords=False, stem=False
-    )
+    tokens = content_tokens("The rivers flooded", "en", remove_stopwords=False, stem=False)
     assert tokens == ["the", "rivers", "flooded"]
 
 

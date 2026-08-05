@@ -13,6 +13,7 @@ from lexrank.datasets import (
     load_cluster,
     load_paper_example,
 )
+from lexrank.summarizer import Method
 
 CLUSTERS = available_clusters()
 
@@ -55,9 +56,7 @@ def test_synthetic_provenance_is_declared(language: str, cluster_id: str) -> Non
 
 
 @pytest.mark.parametrize(("language", "cluster_id"), CLUSTERS)
-def test_clusters_are_redundant_enough_for_lexrank(
-    language: str, cluster_id: str
-) -> None:
+def test_clusters_are_redundant_enough_for_lexrank(language: str, cluster_id: str) -> None:
     """The thresholded graph must actually be connected, or there is nothing
     to rank.
 
@@ -69,9 +68,7 @@ def test_clusters_are_redundant_enough_for_lexrank(
     threshold, which holds at every size.
     """
     cluster = load_cluster(language, cluster_id)
-    ranking = LexRankSummarizer(language, idf=build_idf(language)).rank(
-        cluster.documents
-    )
+    ranking = LexRankSummarizer(language, idf=build_idf(language)).rank(cluster.documents)
     n = len(ranking.sentences)
     off_diagonal = ranking.similarity[~np.eye(n, dtype=bool)]
     degree = (ranking.similarity > 0.1).sum(axis=1)  # self-link included
@@ -97,7 +94,7 @@ def test_build_idf_covers_the_language(language: str) -> None:
     assert idf.n_documents >= 15
 
 
-def _rouge(language: str, cluster, method: str, seed: int = 0) -> float:
+def _rouge(language: str, cluster, method: Method, seed: int = 0) -> float:
     summary = LexRankSummarizer(
         language, method=method, idf=build_idf(language), seed=seed
     ).summarize(cluster.documents, max_bytes=665)
@@ -124,7 +121,7 @@ def test_every_cluster_scores_above_a_floor(language: str, cluster_id: str) -> N
 
 
 @pytest.mark.parametrize("method", ["lexrank", "continuous", "degree"])
-def test_centrality_beats_the_baselines_on_average(method: str) -> None:
+def test_centrality_beats_the_baselines_on_average(method: Method) -> None:
     """Aggregate comparison in the spirit of Table 3.
 
     The random baseline is averaged over several seeds rather than taken from

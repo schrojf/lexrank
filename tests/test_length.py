@@ -9,7 +9,6 @@ from lexrank import (
     IdfModel,
     LengthSuggestion,
     LexRankSummarizer,
-    content_tokens,
     coverage_curve,
     knee_point,
     non_redundant_count,
@@ -18,7 +17,6 @@ from lexrank import (
 )
 from lexrank.datasets import build_idf, load_cluster
 from lexrank.length import centrality_spread
-
 
 # -- primitives ------------------------------------------------------------
 
@@ -38,9 +36,7 @@ def test_coverage_curve_order_matters() -> None:
     """A sentence carrying more centroid mass covers more when taken first."""
     documents = [["river", "river", "flood"], ["quark"]]
     idf = IdfModel.from_token_documents(documents, smoothing="smooth")
-    assert coverage_curve(documents, idf, [0, 1])[0] > coverage_curve(
-        documents, idf, [1, 0]
-    )[0]
+    assert coverage_curve(documents, idf, [0, 1])[0] > coverage_curve(documents, idf, [1, 0])[0]
 
 
 def test_coverage_curve_handles_empty_vocabulary() -> None:
@@ -136,8 +132,7 @@ def test_redundant_input_is_capped_by_the_non_redundant_ceiling() -> None:
         "Insurers expect the total claims from the flooding to exceed 300 million euro",
     ]
     documents = [
-        ". ".join(f"{f} according to source number {v}" for f in facts) + "."
-        for v in range(4)
+        ". ".join(f"{f} according to source number {v}" for f in facts) + "." for v in range(4)
     ]
     s = LexRankSummarizer("en").suggest_length(documents, target_coverage=0.99)
     assert s.total_sentences == 12

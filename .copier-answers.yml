@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier. Do not edit manually.
+_commit: v0.4.0
+_src_path: gh:jlevy/simple-modern-uv
+package_author_email: viliam@schrojf.sk
+package_author_name: Viliam Schrojf
+package_description: 'LexRank: graph-based lexical centrality as salience in text
+    summarization (Erkan & Radev, 2004), with English and Slovak demo corpora'
+package_github_org: schrojf
+package_license: MIT
+package_module: lexrank
+package_name: lexrank
+publish_to_pypi: false

@@ -23,9 +23,7 @@ def documents() -> list[list[str]]:
     ]
 
 
-def test_centroid_accumulates_idf_per_occurrence(
-    documents: list[list[str]], idf: IdfModel
-) -> None:
+def test_centroid_accumulates_idf_per_occurrence(documents: list[list[str]], idf: IdfModel) -> None:
     """Algorithm 1 adds idf{w} once for every occurrence, giving tf*idf."""
     centroid = centroid_vector(documents, idf)
     assert centroid["river"] == pytest.approx(2 * math.log(2))
@@ -41,9 +39,7 @@ def test_threshold_prunes_the_centroid(idf: IdfModel) -> None:
     assert centroid_vector(documents, idf, threshold=3.0) == {}
 
 
-def test_sentence_score_sums_centroid_weights(
-    documents: list[list[str]], idf: IdfModel
-) -> None:
+def test_sentence_score_sums_centroid_weights(documents: list[list[str]], idf: IdfModel) -> None:
     scores = centroid_scores(documents, idf)
     centroid = centroid_vector(documents, idf)
     assert scores[0] == pytest.approx(centroid["river"] + centroid["flood"])

@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from typing import Protocol, runtime_checkable
 
 from .languages import Language, get_language
 
@@ -20,9 +21,7 @@ _WORD_RE = re.compile(r"[^\W\d_]+(?:['’‘-][^\W\d_]+)*|\d+(?:[.,]\d+)*")
 _TERMINATORS = ".!?…"
 _CLOSERS = ")]}\"'»›“”„‘’"
 
-_BOUNDARY_RE = re.compile(
-    rf"[{re.escape(_TERMINATORS)}]+[{re.escape(_CLOSERS)}]*"
-)
+_BOUNDARY_RE = re.compile(rf"[{re.escape(_TERMINATORS)}]+[{re.escape(_CLOSERS)}]*")
 _PARAGRAPH_RE = re.compile(r"\n\s*\n+")
 _TRAILING_WORD_RE = re.compile(r"([^\W\d_]+|\d+)$")
 _LEADING_WORD_RE = re.compile(r"^\s*([^\W\d_]+|\d+)")
@@ -118,9 +117,7 @@ def _is_boundary(text: str, match: re.Match[str], lang: Language) -> bool:
         if len(prev_word) == 1 and prev_word.isalpha() and next_word[:1].isupper():
             return False
         # Ordinals and dates: "5. mája", "5. 5. 1945", "20. storočia"
-        if prev_word.isdigit() and (
-            next_word.isdigit() or next_norm in lang.ordinal_followers
-        ):
+        if prev_word.isdigit() and (next_word.isdigit() or next_norm in lang.ordinal_followers):
             return False
 
     # A lowercase continuation is almost never a new sentence.
@@ -151,8 +148,16 @@ def split_sentences(text: str, language: str | Language) -> list[str]:
     return sentences
 
 
+@runtime_checkable
+class _HasIdAndText(Protocol):
+    """Anything with ``id``/``text`` attributes, e.g. :class:`~lexrank.datasets.Document`."""
+
+    id: str
+    text: str
+
+
 def build_sentences(
-    documents: Iterable[str] | Iterable[tuple[str, str]],
+    documents: Iterable[str] | Iterable[tuple[str, str]] | Iterable[_HasIdAndText],
     language: str | Language,
     **token_options: object,
 ) -> list[Sentence]:
@@ -167,7 +172,7 @@ def build_sentences(
     for position, entry in enumerate(documents):
         if isinstance(entry, str):
             document_id, text = f"d{position + 1}", entry
-        elif hasattr(entry, "text"):
+        elif isinstance(entry, _HasIdAndText):
             document_id = str(getattr(entry, "id", f"d{position + 1}"))
             text = entry.text
         else:
@@ -177,7 +182,7 @@ def build_sentences(
             sentences.append(
                 Sentence(
                     text=sentence_text,
-                    tokens=tuple(content_tokens(sentence_text, lang, **token_options)),  # type: ignore[arg-type]
+                    tokens=tuple(content_tokens(sentence_text, lang, **token_options)),  # pyright: ignore[reportArgumentType]
                     document_id=document_id,
                     index_in_document=offset,
                     document_length=len(texts),

@@ -11,7 +11,8 @@ from .base import Language
 from .stemming import slovak_stem
 
 # Folded forms: "keď" -> "ked", "že" -> "ze", "sú" -> "su".
-STOPWORDS = frozenset("""
+STOPWORDS = frozenset(
+    """
 a aby aj ak ako ale alebo ani ano asi az bez bol bola boli bolo bude budem
 budes budeme budete budu by bym bys byt cez co coho com comu ci cim cize
 dalej dalsi dnes do ho hoci i iba ich im ine inak iny ista iste isty ja je
@@ -26,26 +27,31 @@ tento teraz tie tieto tiez to toho tohto tom tomto tomu tomuto toto tu tuto
 ty tym tymto tymi u uz v vam vas vasa vase viac vo vsak vsetci vsetko vsetky
 vy z za zo ze zas este sice nielen nic nikto niekto vsade vtedy vzdy len
 bola byt mat mozu museli musi maju
-""".split())
+""".split()
+)
 
-ABBREVIATIONS = frozenset("""
+ABBREVIATIONS = frozenset(
+    """
 napr atd atp apod tzv tzn resp pripadne popr cca str s r o a.s s.r.o
 mil mld tis hod min sek kap obr tab vid pozri sv ul nam okr kraj
 prof doc ing mgr bc phdr judr mudr rndr paeddr mvdr csc drsc phd arch dipl
 tel fax mob email www c cislo ods pism cl zb zak vyd
 jan feb mar apr maj jun jul aug sep sept okt nov dec
 p pp t.j tj t.z napr. resp. atd. sl slov angl nem lat gr
-""".split())
+""".split()
+)
 
 # Slovak writes dates and ordinals as "5. mája 1945" / "20. storočia" -- a
 # period after a number followed by one of these must not end the sentence.
-ORDINAL_FOLLOWERS = frozenset("""
+ORDINAL_FOLLOWERS = frozenset(
+    """
 januara februara marca aprila maja juna jula augusta septembra oktobra
 novembra decembra januar februar marec april maj jun jul august september
 oktober november december
 storocia storocie storoci rocnika rocnik polrok polroka kvartal kvartalu
 miesto mieste miesta poschodie poschodi triede trieda kola kolo kole
-""".split())
+""".split()
+)
 
 SLOVAK = Language(
     code="sk",

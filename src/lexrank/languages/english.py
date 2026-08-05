@@ -5,7 +5,8 @@ from __future__ import annotations
 from .base import Language
 from .stemming import porter_stem
 
-STOPWORDS = frozenset("""
+STOPWORDS = frozenset(
+    """
 a about above after again against all am an and any are aren't as at be because
 been before being below between both but by can cannot could couldn't did didn't
 do does doesn't doing don't down during each few for from further had hadn't has
@@ -19,9 +20,11 @@ too under until up very was wasn't we we'd we'll we're we've were weren't what
 what's when when's where where's which while who who's whom why why's with won't
 would wouldn't you you'd you'll you're you've your yours yourself yourselves
 also just now said says get got may might must many much upon
-""".split())
+""".split()
+)
 
-ABBREVIATIONS = frozenset("""
+ABBREVIATIONS = frozenset(
+    """
 mr mrs ms mx dr prof sr jr st rev hon gen col maj capt lt sgt gov pres supt
 inc ltd co corp llc plc dept div est fig figs no nos vol vols pp ed eds
 approx appt apt assn assoc ave blvd rd sq dist univ inst
@@ -29,7 +32,8 @@ jan feb mar apr jun jul aug sept sep oct nov dec
 mon tue tues wed thu thur thurs fri sat sun
 etc vs viz cf al ca circa eg ie
 a.m p.m u.s u.k u.s.a e.g i.e ph.d m.d b.a m.a b.s m.s d.c
-""".split())
+""".split()
+)
 
 ENGLISH = Language(
     code="en",

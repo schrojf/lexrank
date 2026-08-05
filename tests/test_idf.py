@@ -38,7 +38,7 @@ def test_smooth_smoothing_keeps_every_word(documents: list[list[str]]) -> None:
     assert idf["quark"] > idf["river"] > idf["the"]
 
 
-def test_unary_smoothing_reduces_to_plain_tf(documents: list[list[str]]) -> None:
+def test_unary_smoothing_reduces_to_plain_tf() -> None:
     idf = IdfModel.unary()
     assert idf["anything"] == 1.0
     assert idf["the"] == 1.0
@@ -68,10 +68,8 @@ def test_repeated_word_counts_once_per_document() -> None:
     assert idf.document_frequency("a") == 1
 
 
-def test_from_raw_documents_tokenizes(documents: list[list[str]]) -> None:
-    idf = IdfModel.from_documents(
-        ["The rivers flooded the town.", "The river rose."], "en"
-    )
+def test_from_raw_documents_tokenizes() -> None:
+    idf = IdfModel.from_documents(["The rivers flooded the town.", "The river rose."], "en")
     assert idf.n_documents == 2
     assert idf.document_frequency("river") == 2
     assert "the" not in idf  # dropped as a stopword before counting

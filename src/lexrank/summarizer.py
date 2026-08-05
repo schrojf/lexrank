@@ -167,9 +167,7 @@ class LexRankSummarizer:
     def _token_options(self) -> dict[str, object]:
         return {"remove_stopwords": self.remove_stopwords, "stem": self.stem}
 
-    def rank(
-        self, documents: Iterable[str] | Iterable[tuple[str, str]]
-    ) -> Ranking:
+    def rank(self, documents: Iterable[str] | Iterable[tuple[str, str]]) -> Ranking:
         """Score every sentence in a cluster without selecting a summary."""
         sentences = build_sentences(documents, self.language, **self._token_options())
         n = len(sentences)
@@ -186,9 +184,7 @@ class LexRankSummarizer:
             )
 
         tokens = [sentence.tokens for sentence in sentences]
-        idf = self.idf or IdfModel.from_token_documents(
-            tokens, smoothing=self.idf_smoothing
-        )
+        idf = self.idf or IdfModel.from_token_documents(tokens, smoothing=self.idf_smoothing)
         similarity = similarity_matrix(tokens, idf)
         centrality = self._centrality(tokens, similarity, idf)
         position = np.array(
@@ -201,9 +197,7 @@ class LexRankSummarizer:
             dtype=np.float64,
         )
 
-        eligible = np.array(
-            [sentence.word_count >= self.length_cutoff for sentence in sentences]
-        )
+        eligible = np.array([sentence.word_count >= self.length_cutoff for sentence in sentences])
         if not eligible.any():
             eligible = np.ones(n, dtype=bool)
 
@@ -227,9 +221,7 @@ class LexRankSummarizer:
         idf: IdfModel,
     ) -> np.ndarray:
         if self.method == "lexrank":
-            return lexrank_scores(
-                similarity, threshold=self.threshold, damping=self.damping
-            )
+            return lexrank_scores(similarity, threshold=self.threshold, damping=self.damping)
         if self.method == "continuous":
             return lexrank_scores(
                 similarity,
@@ -246,9 +238,7 @@ class LexRankSummarizer:
             return np.zeros(len(tokens), dtype=np.float64)
         if self.method == "random":
             rng = random.Random(self.seed)
-            return np.array(
-                [rng.random() for _ in range(len(tokens))], dtype=np.float64
-            )
+            return np.array([rng.random() for _ in range(len(tokens))], dtype=np.float64)
         raise ValueError(f"unknown method {self.method!r}")
 
     # -- selection ---------------------------------------------------------
@@ -351,9 +341,16 @@ class LexRankSummarizer:
         ranking = self.rank(documents)
         if not ranking.sentences:
             return LengthSuggestion(
-                sentences=0, words=0, bytes=0, total_sentences=0, non_redundant=0,
-                diminishing_returns=0, coverage=0.0, discriminates=False,
-                bound_by="empty input", notes=["no sentences in input"],
+                sentences=0,
+                words=0,
+                bytes=0,
+                total_sentences=0,
+                non_redundant=0,
+                diminishing_returns=0,
+                coverage=0.0,
+                discriminates=False,
+                bound_by="empty input",
+                notes=["no sentences in input"],
             )
 
         order = ranking.ordered_indices()
@@ -407,8 +404,7 @@ class LexRankSummarizer:
             )
         if len(ranking.sentences) < 10:
             notes.append(
-                f"only {len(ranking.sentences)} sentences — too few for "
-                "centrality to mean much"
+                f"only {len(ranking.sentences)} sentences — too few for centrality to mean much"
             )
         if sentences >= len(order):
             notes.append("the budget covers the whole input; no summarizing to do")
@@ -426,15 +422,12 @@ class LexRankSummarizer:
             notes=notes,
         )
 
-    def _is_redundant(
-        self, index: int, selected: Sequence[int], ranking: Ranking
-    ) -> bool:
+    def _is_redundant(self, index: int, selected: Sequence[int], ranking: Ranking) -> bool:
         """Cross-sentence subsumption check used by the reranker."""
         if self.reranker_threshold is None or not selected:
             return False
         return bool(
-            max(ranking.similarity[index, chosen] for chosen in selected)
-            > self.reranker_threshold
+            max(ranking.similarity[index, chosen] for chosen in selected) > self.reranker_threshold
         )
 
 
@@ -452,8 +445,8 @@ def summarize(
     """
     if isinstance(documents, str):
         documents = [documents]
-    documents = list(documents)
-    summarizer = LexRankSummarizer(language, **options)  # type: ignore[arg-type]
+    documents = list(documents)  # pyright: ignore[reportAssignmentType]
+    summarizer = LexRankSummarizer(language, **options)  # pyright: ignore[reportArgumentType]
     if sentences is None:
         sentences = max(1, summarizer.suggest_length(documents).sentences)
     return summarizer.summarize(documents, max_sentences=sentences)
@@ -474,7 +467,7 @@ def suggest_length(
     """
     if isinstance(documents, str):
         documents = [documents]
-    summarizer = LexRankSummarizer(language, **options)  # type: ignore[arg-type]
+    summarizer = LexRankSummarizer(language, **options)  # pyright: ignore[reportArgumentType]
     return summarizer.suggest_length(
         documents, target_bytes=target_bytes, target_coverage=target_coverage
     )

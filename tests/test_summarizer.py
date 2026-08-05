@@ -42,10 +42,10 @@ def test_ranking_covers_every_sentence(english) -> None:
 
 
 def test_position_feature_runs_from_one_to_zero(english) -> None:
-    """"the first sentence of a document gets the maximum Position value of 1,
+    """ "the first sentence of a document gets the maximum Position value of 1,
     and the last sentence gets the value 0"."""
     ranking = LexRankSummarizer("en").rank(english.documents)
-    for sentence, position in zip(ranking.sentences, ranking.position):
+    for sentence, position in zip(ranking.sentences, ranking.position, strict=True):
         if sentence.index_in_document == 0:
             assert position == pytest.approx(1.0)
         elif sentence.index_in_document == sentence.document_length - 1:
@@ -92,9 +92,7 @@ def test_sentence_budget(english) -> None:
 
 
 def test_byte_budget_is_respected(english) -> None:
-    summary = LexRankSummarizer("en").summarize(
-        english.documents, max_bytes=DUC_BYTE_BUDGET
-    )
+    summary = LexRankSummarizer("en").summarize(english.documents, max_bytes=DUC_BYTE_BUDGET)
     assert len(summary.text.encode("utf-8")) <= DUC_BYTE_BUDGET
     assert len(summary) > 1
 
@@ -115,9 +113,7 @@ def test_document_order_is_restored_by_default(english) -> None:
 
 
 def test_score_order_follows_the_ranking(english) -> None:
-    summary = LexRankSummarizer("en").summarize(
-        english.documents, max_sentences=5, order="score"
-    )
+    summary = LexRankSummarizer("en").summarize(english.documents, max_sentences=5, order="score")
     scores = [summary.ranking.score[i] for i in summary.indices]
     assert scores == sorted(scores, reverse=True)
 
@@ -131,9 +127,7 @@ def test_selected_sentences_come_from_several_documents(english) -> None:
 
 
 def test_reranker_drops_a_near_duplicate() -> None:
-    duplicate = (
-        "The harbour wall was overtopped by a two metre surge on Tuesday morning."
-    )
+    duplicate = "The harbour wall was overtopped by a two metre surge on Tuesday morning."
     documents = [
         duplicate,
         duplicate,
@@ -142,9 +136,7 @@ def test_reranker_drops_a_near_duplicate() -> None:
     with_reranker = LexRankSummarizer("en", reranker_threshold=0.5).summarize(
         documents, max_sentences=3
     )
-    without = LexRankSummarizer("en", reranker_threshold=None).summarize(
-        documents, max_sentences=3
-    )
+    without = LexRankSummarizer("en", reranker_threshold=None).summarize(documents, max_sentences=3)
     assert len(with_reranker) == 2
     assert len(without) == 3
 
@@ -164,16 +156,12 @@ def test_centrality_weight_of_zero_reduces_to_the_lead_baseline(english) -> None
     lexrank = LexRankSummarizer("en", centrality_weight=0.0).summarize(
         english.documents, max_sentences=4
     )
-    lead = LexRankSummarizer("en", method="lead").summarize(
-        english.documents, max_sentences=4
-    )
+    lead = LexRankSummarizer("en", method="lead").summarize(english.documents, max_sentences=4)
     assert lexrank.indices == lead.indices
 
 
 def test_position_weight_of_zero_changes_the_selection(english) -> None:
-    with_position = LexRankSummarizer("en").summarize(
-        english.documents, max_sentences=5
-    )
+    with_position = LexRankSummarizer("en").summarize(english.documents, max_sentences=5)
     without = LexRankSummarizer("en", position_weight=0.0).summarize(
         english.documents, max_sentences=5
     )
@@ -202,7 +190,10 @@ def test_random_baseline_is_reproducible(english) -> None:
 
 def test_unknown_method_is_rejected(english) -> None:
     with pytest.raises(ValueError, match="unknown method"):
-        LexRankSummarizer("en", method="nonsense").rank(english.documents)  # type: ignore[arg-type]
+        LexRankSummarizer(
+            "en",
+            method="nonsense",  # pyright: ignore[reportArgumentType]
+        ).rank(english.documents)
 
 
 def test_unknown_language_is_rejected() -> None:

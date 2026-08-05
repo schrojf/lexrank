@@ -20,15 +20,11 @@ import numpy as np
 from .idf import IdfModel
 
 
-def idf_modified_cosine(
-    x: Sequence[str], y: Sequence[str], idf: IdfModel
-) -> float:
+def idf_modified_cosine(x: Sequence[str], y: Sequence[str], idf: IdfModel) -> float:
     """Equation 2 for a single sentence pair, written out term by term."""
     tf_x, tf_y = Counter(x), Counter(y)
 
-    numerator = sum(
-        tf_x[word] * tf_y[word] * idf[word] ** 2 for word in tf_x.keys() & tf_y.keys()
-    )
+    numerator = sum(tf_x[word] * tf_y[word] * idf[word] ** 2 for word in tf_x.keys() & tf_y.keys())
     if numerator == 0.0:
         return 0.0
 
@@ -38,9 +34,7 @@ def idf_modified_cosine(
     return numerator / denominator if denominator else 0.0
 
 
-def tfidf_matrix(
-    documents: Sequence[Sequence[str]], idf: IdfModel
-) -> tuple[np.ndarray, list[str]]:
+def tfidf_matrix(documents: Sequence[Sequence[str]], idf: IdfModel) -> tuple[np.ndarray, list[str]]:
     """Dense ``(n_documents, n_terms)`` matrix of ``tf * idf`` weights."""
     vocabulary: dict[str, int] = {}
     for tokens in documents:
@@ -56,9 +50,7 @@ def tfidf_matrix(
     return matrix, terms
 
 
-def similarity_matrix(
-    documents: Sequence[Sequence[str]], idf: IdfModel
-) -> np.ndarray:
+def similarity_matrix(documents: Sequence[Sequence[str]], idf: IdfModel) -> np.ndarray:
     """Symmetric ``(n, n)`` matrix of idf-modified-cosine values.
 
     The diagonal is forced to 1.0. The paper notes that "every sentence is

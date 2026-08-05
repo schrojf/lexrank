@@ -54,7 +54,7 @@ def test_summarize_stdin(capsys, monkeypatch) -> None:
     assert len(output.strip().splitlines()) == 2
 
 
-def test_summarize_with_empty_stdin_fails(capsys, monkeypatch) -> None:
+def test_summarize_with_empty_stdin_fails(monkeypatch) -> None:
     import io
 
     monkeypatch.setattr("sys.stdin", io.StringIO("   "))
@@ -62,9 +62,7 @@ def test_summarize_with_empty_stdin_fails(capsys, monkeypatch) -> None:
 
 
 def test_summarize_with_scores(capsys) -> None:
-    output = run(
-        capsys, "summarize", "-d", "harbour-storm", "-n", "2", "--scores"
-    )
+    output = run(capsys, "summarize", "-d", "harbour-storm", "-n", "2", "--scores")
     assert "score=" in output and "centrality=" in output
 
 
@@ -77,9 +75,7 @@ def test_byte_budget_flag(capsys) -> None:
     "method", ["lexrank", "continuous", "degree", "centroid", "lead", "random"]
 )
 def test_every_method_runs(capsys, method: str) -> None:
-    output = run(
-        capsys, "summarize", "-d", "harbour-storm", "-n", "2", "--method", method
-    )
+    output = run(capsys, "summarize", "-d", "harbour-storm", "-n", "2", "--method", method)
     assert output.strip()
 
 
@@ -165,9 +161,7 @@ def test_summarize_auto(capsys) -> None:
     from lexrank import suggest_length
     from lexrank.datasets import load_cluster
 
-    expected = suggest_length(
-        load_cluster("en", "harbour-storm").documents, "en"
-    ).sentences
+    expected = suggest_length(load_cluster("en", "harbour-storm").documents, "en").sentences
     assert len(auto.strip().splitlines()) == expected
 
 

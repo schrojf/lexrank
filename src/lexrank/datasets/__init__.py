@@ -15,9 +15,9 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from importlib import resources
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 from ..idf import IdfModel
 from ..languages import Language, get_language
@@ -52,12 +52,12 @@ class Cluster:
         return len(self.documents)
 
 
-def _read(language: str, name: str) -> dict:
+def _read(language: str, name: str) -> dict[str, Any]:
     payload = DATA_ROOT.joinpath(language, f"{name}.json").read_text("utf-8")
     return json.loads(payload)
 
 
-@lru_cache(maxsize=None)
+@cache
 def available_clusters(language: str | None = None) -> tuple[tuple[str, str], ...]:
     """``(language, cluster_id)`` pairs for every bundled cluster."""
     languages = [language] if language else ["en", "sk"]
@@ -86,7 +86,7 @@ def load_cluster(language: str, cluster_id: str) -> Cluster:
     )
 
 
-def load_paper_example() -> dict:
+def load_paper_example() -> dict[str, Any]:
     """Published numbers for the worked example in the paper.
 
     Returns Figure 1's cosine matrix together with the Degree scores of Table 1
@@ -106,7 +106,7 @@ def load_background(language: str) -> list[str]:
     return list(_read(language, "background")["documents"])
 
 
-@lru_cache(maxsize=None)
+@cache
 def build_idf(
     language: str,
     *,

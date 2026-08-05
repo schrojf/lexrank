@@ -13,9 +13,7 @@ from lexrank import IdfModel, idf_modified_cosine, similarity_matrix, tfidf_matr
 @pytest.fixture
 def idf() -> IdfModel:
     # 8 documents; "the" is everywhere, "quark" is rare.
-    return IdfModel(
-        {"the": 8, "river": 4, "flood": 2, "quark": 1}, 8, smoothing="paper"
-    )
+    return IdfModel({"the": 8, "river": 4, "flood": 2, "quark": 1}, 8, smoothing="paper")
 
 
 def test_matches_a_hand_computation(idf: IdfModel) -> None:
@@ -58,7 +56,7 @@ def test_disjoint_sentences_score_zero(idf: IdfModel) -> None:
 
 
 def test_zero_idf_words_are_invisible(idf: IdfModel) -> None:
-    """"the" occurs in every document, so log(N/N) = 0 removes it."""
+    """ "the" occurs in every document, so log(N/N) = 0 removes it."""
     assert idf["the"] == 0.0
     assert idf_modified_cosine(["the"], ["the"], idf) == 0.0
     assert idf_modified_cosine(["river", "the"], ["river"], idf) == pytest.approx(1.0)
@@ -66,9 +64,7 @@ def test_zero_idf_words_are_invisible(idf: IdfModel) -> None:
 
 def test_symmetry(idf: IdfModel) -> None:
     x, y = ["river", "flood", "the"], ["river", "quark", "quark"]
-    assert idf_modified_cosine(x, y, idf) == pytest.approx(
-        idf_modified_cosine(y, x, idf)
-    )
+    assert idf_modified_cosine(x, y, idf) == pytest.approx(idf_modified_cosine(y, x, idf))
 
 
 def test_matrix_agrees_with_the_literal_formula(idf: IdfModel) -> None:
@@ -84,9 +80,7 @@ def test_matrix_agrees_with_the_literal_formula(idf: IdfModel) -> None:
         for j, y in enumerate(documents):
             if i == j:
                 continue
-            assert matrix[i, j] == pytest.approx(
-                idf_modified_cosine(x, y, idf), abs=1e-12
-            )
+            assert matrix[i, j] == pytest.approx(idf_modified_cosine(x, y, idf), abs=1e-12)
 
 
 def test_matrix_shape_symmetry_and_diagonal(idf: IdfModel) -> None:
@@ -113,6 +107,6 @@ def test_empty_input(idf: IdfModel) -> None:
 
 def test_tfidf_matrix_weights(idf: IdfModel) -> None:
     matrix, terms = tfidf_matrix([["river", "river", "flood"]], idf)
-    weights = dict(zip(terms, matrix[0]))
+    weights = dict(zip(terms, matrix[0], strict=True))
     assert weights["river"] == pytest.approx(2 * math.log(2))
     assert weights["flood"] == pytest.approx(math.log(4))

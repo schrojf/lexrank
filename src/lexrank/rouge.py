@@ -15,6 +15,7 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from typing import override
 
 from .languages import Language, get_language
 from .tokenization import tokenize_words
@@ -26,6 +27,7 @@ class RougeScore:
     precision: float
     f1: float
 
+    @override
     def __str__(self) -> str:
         return f"R={self.recall:.4f} P={self.precision:.4f} F1={self.f1:.4f}"
 
@@ -45,9 +47,7 @@ def truncate_to_bytes(text: str, max_bytes: int) -> str:
 def ngrams(tokens: Sequence[str], n: int) -> Counter[tuple[str, ...]]:
     if n <= 0:
         raise ValueError("n must be positive")
-    return Counter(
-        tuple(tokens[i : i + n]) for i in range(len(tokens) - n + 1)
-    )
+    return Counter(tuple(tokens[i : i + n]) for i in range(len(tokens) - n + 1))
 
 
 def rouge_n(
@@ -78,24 +78,18 @@ def rouge_n(
     for reference in references:
         reference_grams = ngrams(tokenize_words(reference, lang), n)
         reference_total += sum(reference_grams.values())
-        matched += sum(
-            min(count, candidate_grams[gram]) for gram, count in reference_grams.items()
-        )
+        matched += sum(min(count, candidate_grams[gram]) for gram, count in reference_grams.items())
 
     candidate_total = sum(candidate_grams.values()) * len(references)
     recall = matched / reference_total if reference_total else 0.0
     precision = matched / candidate_total if candidate_total else 0.0
-    f1 = (
-        2 * recall * precision / (recall + precision)
-        if recall + precision > 0
-        else 0.0
-    )
+    f1 = 2 * recall * precision / (recall + precision) if recall + precision > 0 else 0.0
     return RougeScore(recall=recall, precision=precision, f1=f1)
 
 
 def rouge_1(candidate: str, references: Iterable[str], **options: object) -> RougeScore:
-    return rouge_n(candidate, references, n=1, **options)  # type: ignore[arg-type]
+    return rouge_n(candidate, references, n=1, **options)  # pyright: ignore[reportArgumentType]
 
 
 def rouge_2(candidate: str, references: Iterable[str], **options: object) -> RougeScore:
-    return rouge_n(candidate, references, n=2, **options)  # type: ignore[arg-type]
+    return rouge_n(candidate, references, n=2, **options)  # pyright: ignore[reportArgumentType]
