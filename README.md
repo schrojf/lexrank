@@ -326,7 +326,81 @@ It picked the two sentences that share the most with the rest — the surge (sta
 in both files) and the headline financial figure — and dropped the injury count
 and the share price, which appear once each.
 
+#### Why one file per document matters
+
+This is the single most consequential thing to get right, and the reason is not
+obvious: **document boundaries do not change the similarity graph at all.**
+
+The graph is built over *sentences*, globally. Whether you pass five files or one
+concatenated blob, the tokenizer produces the same sentences in the same order,
+so the cosine matrix and the LexRank scores come out bit-identical. Verified on
+`harbour-storm`:
+
+| property | 1 concatenated doc vs 5 separate docs |
+| --- | --- |
+| sentence count | same (36) |
+| similarity matrix | **identical** |
+| centrality scores | **identical** |
+| Position feature | *differs* |
+| final combined score | *differs* |
+
+What boundaries change is the **Position feature**, which ramps from 1.0 at the
+first sentence of *each* document to 0.0 at its last. Concatenate, and you get a
+single ramp across the whole blob, so the opening of the first article outranks
+the opening of every other one. Keep them separate, and each document gets its
+own ramp, so each contributes a strong candidate.
+
+That produces visibly different summaries from byte-identical text:
+
+```console
+$ uv run lexrank summarize wire.txt business.txt -n 2      # two documents
+A two-metre storm surge came over the harbour wall at Aldren Bay on Tuesday morning.
+Insurers expect claims from the Aldren Bay flooding to exceed 300 million euro.
+
+$ cat wire.txt business.txt | uv run lexrank summarize -n 2   # one document
+A two-metre storm surge came over the harbour wall at Aldren Bay on Tuesday morning.
+Emergency services evacuated more than four thousand residents from the lower town overnight.
+```
+
+Both sentences of the concatenated version come from `wire.txt`; the business
+angle is never reached. **So `cat *.txt | lexrank summarize` is not equivalent to
+`lexrank summarize *.txt`** — pass the files.
+
+#### How much redundancy do you actually need?
+
+Adding genuinely different documents is what makes the ranking mean anything.
+Measured on `harbour-storm`, feeding it the first *k* documents:
+
+| documents | sentences | centrality spread | mean similarity | connected |
+| --- | --- | --- | --- | --- |
+| 1 | 8 | **1.00×** | 0.0195 | 75% |
+| 2 | 15 | 1.77× | 0.0371 | 100% |
+| 3 | 22 | 2.51× | 0.0337 | 95% |
+| 4 | 29 | 2.87× | 0.0341 | 90% |
+| 5 | 36 | **3.53×** | 0.0384 | 92% |
+
+*Centrality spread* is the ratio of the highest score to the lowest. **At one
+document it is exactly 1.00× — every sentence scores identically and the ranking
+carries no information whatsoever.** The second document is what breaks the tie;
+after that, returns accumulate steadily.
+
+Two or three genuinely independent sources is the point where LexRank starts
+earning its keep. `lexrank suggest` reports the spread and warns you when it is
+degenerate — see [choosing a length](#choosing-a-length).
+
+#### Chunking one document does not fake it
+
+A tempting workaround is to split a long article into chunks and pass those as
+separate documents. It does not work, and now you can see why: chunking changes
+only the Position ramp, never the graph. Splitting `wire.txt` into three chunks
+leaves the spread at **1.00×** and the mean similarity at **0.0195** — exactly
+the single-document numbers. There is no new redundancy to find, because
+redundancy comes from *independent accounts of the same events*, not from
+rearranging one account.
+
 ### `summarize` — stdin
+
+Piping works and is the right tool for a quick look at one text:
 
 ```console
 $ printf 'The council approved the new flood defences on Tuesday after four years of delay.\nCampaigners said the four-year delay had left the lower town exposed to flooding.\nConstruction of the flood defences is due to begin in the autumn.\n' \
@@ -334,9 +408,24 @@ $ printf 'The council approved the new flood defences on Tuesday after four year
 The council approved the new flood defences on Tuesday after four years of delay.
 ```
 
-Everything piped in is treated as a **single document**, so there is no
-cross-document signal — the Position feature does most of the work. Prefer files
-or `-d` when you have separate sources.
+But be clear about what you are getting. **Everything piped in is one document**,
+so per the section above there is no cross-document signal, centrality is flat,
+and the Position feature decides the outcome — which for a single document means
+you have reimplemented the lead baseline. Here it returned sentence 1 of 3.
+
+That is a legitimate use (a lead baseline on news is genuinely hard to beat, as
+[the evaluation table](#what-the-corpus-shows--and-doesnt) shows), as long as you
+are not under the impression that graph centrality is doing the work. Check with:
+
+```console
+$ cat article.txt | uv run lexrank suggest
+  ! centrality is nearly uniform (spread 1.00x) — LexRank cannot rank this
+    input; selection is driven by the Position feature alone. Add more documents.
+```
+
+Use `summarize file1.txt file2.txt …` or `-d <cluster>` whenever you have
+separate sources. Reserve stdin for one-off inspection and for pipelines where
+the upstream stage has already merged the text for you.
 
 ### `summarize` — a bundled cluster
 
