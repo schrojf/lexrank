@@ -15,6 +15,10 @@ uv sync
 uv run lexrank demo -l en
 ```
 
+> **New to this?** [**FAQ.md**](FAQ.md) explains what the algorithm is, how it
+> works and when to use it in plain language, with no maths and no assumption
+> that you have read the paper. This README is the technical reference.
+
 ---
 
 ## Contents
